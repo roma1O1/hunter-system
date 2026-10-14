@@ -1,108 +1,121 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
     <radialGradient id="bg" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#0a1f38"/>
-      <stop offset="50%" stop-color="#050d1a"/>
+      <stop offset="0%" stop-color="#06121f"/>
+      <stop offset="60%" stop-color="#020608"/>
       <stop offset="100%" stop-color="#000"/>
     </radialGradient>
-    <radialGradient id="iris" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="25%" stop-color="#00ffff"/>
-      <stop offset="60%" stop-color="#00e5ff"/>
-      <stop offset="100%" stop-color="#0066aa"/>
-    </radialGradient>
-    <radialGradient id="irisGlow" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.9"/>
-      <stop offset="60%" stop-color="#00e5ff" stop-opacity="0.2"/>
+    <radialGradient id="auraOuter" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.55"/>
+      <stop offset="40%" stop-color="#00b0ff" stop-opacity="0.15"/>
       <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="eyelid" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#00e5ff"/>
-      <stop offset="50%" stop-color="#0088cc"/>
-      <stop offset="100%" stop-color="#00e5ff"/>
+    <radialGradient id="irisGrad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="20%" stop-color="#a0ffff"/>
+      <stop offset="45%" stop-color="#00ffff"/>
+      <stop offset="75%" stop-color="#00aaff"/>
+      <stop offset="100%" stop-color="#003d66"/>
+    </radialGradient>
+    <radialGradient id="irisCenter" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#00ffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="slash" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#00e5ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="6" result="b"/>
+    <filter id="glowSm">
+      <feGaussianBlur stdDeviation="3" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <filter id="bigGlow">
-      <feGaussianBlur stdDeviation="18"/>
+    <filter id="glowMd">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
-    <filter id="softGlow">
-      <feGaussianBlur stdDeviation="3"/>
+    <filter id="glowBig">
+      <feGaussianBlur stdDeviation="20" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="auraBlur">
+      <feGaussianBlur stdDeviation="30"/>
     </filter>
   </defs>
   
-  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="90" fill="url(#bg)"/>
   
-  <rect x="30" y="30" width="452" height="452" rx="60" fill="none" stroke="#00e5ff" stroke-width="2" opacity="0.15"/>
+  <ellipse cx="256" cy="256" rx="220" ry="220" fill="url(#auraOuter)" filter="url(#auraBlur)"/>
   
-  <g filter="url(#glow)" fill="none" stroke="#00e5ff" stroke-width="9" stroke-linecap="square">
-    <path d="M 70 130 L 70 70 L 130 70"/>
-    <path d="M 382 70 L 442 70 L 442 130"/>
-    <path d="M 70 382 L 70 442 L 130 442"/>
-    <path d="M 382 442 L 442 442 L 442 382"/>
+  <g filter="url(#glowBig)" opacity="0.85">
+    <ellipse cx="256" cy="256" rx="140" ry="90" fill="#00e5ff" opacity="0.35"/>
   </g>
   
-  <g opacity="0.35" filter="url(#bigGlow)">
-    <ellipse cx="256" cy="256" rx="180" ry="100" fill="#00e5ff"/>
+  <g filter="url(#glowMd)">
+    <path d="M 60 256 Q 130 140 256 140 Q 382 140 452 256 Q 382 372 256 372 Q 130 372 60 256 Z" 
+          fill="#000814"/>
   </g>
   
-  <g filter="url(#glow)">
-    <path d="M 96 256 Q 256 120 416 256 Q 256 392 96 256 Z" 
-          fill="#001a2e" stroke="#00e5ff" stroke-width="6" stroke-linejoin="round"/>
+  <g filter="url(#glowMd)" fill="none" stroke="#00e5ff" stroke-width="4" opacity="0.9">
+    <path d="M 60 256 Q 130 140 256 140 Q 382 140 452 256 Q 382 372 256 372 Q 130 372 60 256 Z"/>
   </g>
   
-  <g filter="url(#softGlow)" opacity="0.5">
-    <path d="M 110 256 Q 256 135 402 256" 
-          fill="none" stroke="#00ffff" stroke-width="3"/>
+  <g filter="url(#glowSm)" opacity="0.6">
+    <path d="M 70 256 Q 135 150 256 150" fill="none" stroke="#ffffff" stroke-width="2"/>
+    <path d="M 256 362 Q 377 362 442 256" fill="none" stroke="#ffffff" stroke-width="2"/>
   </g>
   
-  <g filter="url(#glow)">
-    <ellipse cx="256" cy="256" rx="72" ry="72" fill="url(#irisGlow)"/>
-    <ellipse cx="256" cy="256" rx="62" ry="62" fill="url(#iris)"/>
+  <g filter="url(#glowBig)" opacity="0.7">
+    <ellipse cx="256" cy="256" rx="90" ry="90" fill="#00e5ff" opacity="0.55"/>
   </g>
   
-  <g opacity="0.6" stroke="#ffffff" stroke-width="1.5" filter="url(#softGlow)">
-    <line x1="256" y1="200" x2="256" y2="215"/>
-    <line x1="256" y1="297" x2="256" y2="312"/>
-    <line x1="200" y1="256" x2="215" y2="256"/>
-    <line x1="297" y1="256" x2="312" y2="256"/>
-    <line x1="216" y1="216" x2="226" y2="226"/>
-    <line x1="286" y1="286" x2="296" y2="296"/>
-    <line x1="296" y1="216" x2="286" y2="226"/>
-    <line x1="226" y1="286" x2="216" y2="296"/>
+  <g filter="url(#glowMd)">
+    <ellipse cx="256" cy="256" rx="72" ry="72" fill="url(#irisGrad)"/>
   </g>
   
-  <g filter="url(#glow)">
-    <ellipse cx="256" cy="256" rx="14" ry="46" fill="#000000"/>
-    <ellipse cx="256" cy="256" rx="14" ry="46" fill="none" stroke="#00ffff" stroke-width="2"/>
-    <ellipse cx="256" cy="256" rx="6" ry="40" fill="#0a1f38"/>
-    <ellipse cx="256" cy="230" rx="4" ry="8" fill="#ffffff" opacity="0.9"/>
+  <g filter="url(#glowSm)" opacity="0.85" fill="none" stroke="#001a2e" stroke-width="1.5">
+    <ellipse cx="256" cy="256" rx="62" ry="62"/>
+    <ellipse cx="256" cy="256" rx="50" ry="50"/>
+    <ellipse cx="256" cy="256" rx="38" ry="38"/>
   </g>
   
-  <g filter="url(#glow)" fill="#00e5ff" opacity="0.9">
-    <polygon points="150,150 158,158 150,166 142,158"/>
-    <polygon points="362,150 370,158 362,166 354,158"/>
-    <polygon points="150,346 158,354 150,362 142,354"/>
-    <polygon points="362,346 370,354 362,362 354,354"/>
+  <g filter="url(#glowSm)" opacity="0.9">
+    <line x1="256" y1="190" x2="256" y2="322" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+    <line x1="196" y1="256" x2="316" y2="256" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
+    <line x1="215" y1="215" x2="297" y2="297" stroke="#00e5ff" stroke-width="1" opacity="0.4"/>
+    <line x1="297" y1="215" x2="215" y2="297" stroke="#00e5ff" stroke-width="1" opacity="0.4"/>
   </g>
   
-  <g stroke="#00e5ff" stroke-width="2" opacity="0.7" filter="url(#glow)" stroke-linecap="square">
-    <line x1="256" y1="100" x2="256" y2="130"/>
-    <line x1="256" y1="382" x2="256" y2="412"/>
-    <line x1="100" y1="256" x2="70" y2="256" opacity="0.4"/>
-    <line x1="412" y1="256" x2="442" y2="256" opacity="0.4"/>
+  <g filter="url(#glowBig)">
+    <ellipse cx="256" cy="256" rx="16" ry="58" fill="#000000"/>
+    <ellipse cx="256" cy="256" rx="16" ry="58" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.9"/>
+    <ellipse cx="256" cy="256" rx="6" ry="50" fill="#0a1a30"/>
   </g>
   
-  <g filter="url(#softGlow)" opacity="0.55">
-    <text x="256" y="460" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="28" font-weight="900" fill="#00e5ff" letter-spacing="10">◆ ◇ ◆</text>
+  <g filter="url(#glowSm)" opacity="0.9">
+    <ellipse cx="243" cy="225" rx="7" ry="14" fill="#ffffff"/>
+    <ellipse cx="268" cy="290" rx="4" ry="8" fill="#00ffff" opacity="0.7"/>
   </g>
   
-  <g filter="url(#glow)" opacity="0.9">
-    <text x="105" y="110" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="24" font-weight="900" fill="#00e5ff">E</text>
-    <text x="407" y="110" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="24" font-weight="900" fill="#00e5ff">S</text>
-    <text x="105" y="420" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="24" font-weight="900" fill="#00e5ff">S</text>
-    <text x="407" y="420" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="24" font-weight="900" fill="#00e5ff">E</text>
+  <g filter="url(#glowMd)" stroke="url(#slash)" stroke-width="3" fill="none" opacity="0.8">
+    <path d="M 130 100 L 180 90"/>
+    <path d="M 340 90 L 390 100"/>
+    <path d="M 130 412 L 180 422"/>
+    <path d="M 340 422 L 390 412"/>
+  </g>
+  
+  <g filter="url(#glowSm)" opacity="0.9">
+    <circle cx="100" cy="256" r="5" fill="#00e5ff"/>
+    <circle cx="412" cy="256" r="5" fill="#00e5ff"/>
+    <circle cx="256" cy="90" r="4" fill="#00e5ff" opacity="0.7"/>
+    <circle cx="256" cy="422" r="4" fill="#00e5ff" opacity="0.7"/>
+  </g>
+  
+  <g filter="url(#glowSm)" stroke="#00e5ff" stroke-width="1.5" opacity="0.5">
+    <line x1="100" y1="256" x2="130" y2="256"/>
+    <line x1="382" y1="256" x2="412" y2="256"/>
+    <line x1="256" y1="110" x2="256" y2="130"/>
+    <line x1="256" y1="382" x2="256" y2="402"/>
   </g>
 </svg>
