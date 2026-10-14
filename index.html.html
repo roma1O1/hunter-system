@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#00e5ff">
+<title>СИСТЕМА // MONARCH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--accent:#00e5ff;--soft:#8ab4f8;--green:#00ff88;--red:#ff2d55;--gold:#ffcc00;--purple:#b16bff;--orange:#ff8c42;--pink:#ff6bb5;--bg:#03060c;--border:rgba(0,229,255,.25);--glow:rgba(0,229,255,.5);}
+body.theme-red{--accent:#ff2d55;--soft:#ff8aa0;--border:rgba(255,45,85,.25);--glow:rgba(255,45,85,.5);}
+body.theme-gold{--accent:#ffcc00;--soft:#ffe080;--border:rgba(255,204,0,.25);--glow:rgba(255,204,0,.5);}
+body.theme-purple{--accent:#b16bff;--soft:#d0a5ff;--border:rgba(177,107,255,.25);--glow:rgba(177,107,255,.5);}
+html,body{height:100%;background:var(--bg);color:#e6e6e6;font-family:'Lato',sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;font-size:14px;}
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#bgGrid{position:fixed;inset:0;z-index:1;pointer-events:none;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:52px 52px;opacity:.3;animation:gridScroll 30s linear infinite;mask-image:radial-gradient(circle at center,#000 25%,transparent 78%);-webkit-mask-image:radial-gradient(circle at center,#000 25%,transparent 78%);}
+@keyframes gridScroll{to{background-position:52px 52px;}}
+#bgVignette{position:fixed;inset:0;z-index:1;pointer-events:none;background:radial-gradient(circle at center,transparent 30%,rgba(0,0,0,.78) 100%);}
+#aura{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 2s ease;}
+#boot{position:fixed;inset:0;z-index:9999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .8s ease;}
+#boot.hide{opacity:0;pointer-events:none;}
+.boot-logo{font-family:'Orbitron';font-size:clamp(32px,9vw,64px);font-weight:900;letter-spacing:16px;color:var(--accent);text-shadow:0 0 30px var(--accent),0 0 60px var(--accent);animation:logoGlitch 4s infinite;}
+@keyframes logoGlitch{0%,87%,100%{transform:translate(0);}88%{transform:translate(-3px,2px);text-shadow:3px 0 var(--red),-3px 0 var(--accent);}89%{transform:translate(3px,-2px);text-shadow:-3px 0 var(--accent),3px 0 var(--red);}90%{transform:translate(0);}}
+.boot-bar{width:min(360px,75vw);height:3px;background:rgba(0,229,255,.15);border-radius:2px;overflow:hidden;}
+.boot-bar>div{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#fff,var(--accent));box-shadow:0 0 20px var(--accent);transition:width .35s ease;}
+.boot-log{font-family:'Orbitron';font-size:11px;letter-spacing:4px;color:var(--soft);min-height:16px;text-align:center;padding:0 20px;}
+#app{position:relative;z-index:2;height:100vh;display:grid;grid-template-columns:240px 1fr;opacity:0;transition:opacity .9s ease;}
+#app.show{opacity:1;}
+.sidebar{background:linear-gradient(180deg,rgba(6,18,34,.97),rgba(3,9,18,.99));border-right:1px solid var(--border);padding:14px 10px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:4px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:6px 12px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;}
+.sb-logo .mark{font-size:20px;filter:drop-shadow(0 0 10px var(--accent));animation:pulse 2.5s infinite alternate;}
+.sb-logo .name{font-family:'Orbitron';font-size:12px;font-weight:900;letter-spacing:4px;color:var(--accent);text-shadow:0 0 12px var(--accent);}
+@keyframes pulse{from{opacity:.4;}to{opacity:1;}}
+.nav{display:flex;flex-direction:column;gap:1px;flex:1;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:6px;color:var(--soft);cursor:pointer;font-size:12px;font-weight:600;border-left:3px solid transparent;transition:all .2s ease;}
+.nav-item:hover{background:rgba(0,229,255,.05);color:var(--accent);}
+.nav-item.active{background:rgba(0,229,255,.1);color:var(--accent);border-left-color:var(--accent);text-shadow:0 0 8px var(--glow);}
+.nav-item .ni{font-size:16px;min-width:20px;text-align:center;}
+.nav-item .badge{margin-left:auto;background:var(--green);color:#000;font-family:'Orbitron';font-size:9px;font-weight:900;padding:2px 6px;border-radius:10px;}
+.nav-item .badge.red{background:var(--red);color:#fff;}
+.sb-footer{margin-top:auto;padding-top:10px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px;}
+.sb-clock{font-family:'Orbitron';font-size:10px;letter-spacing:2px;text-align:center;color:var(--soft);line-height:1.7;}
+.sb-clock b{color:var(--accent);}
+.main{display:flex;flex-direction:column;overflow:hidden;position:relative;}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:12px 22px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(6,18,34,.6),transparent);position:relative;z-index:5;flex-wrap:wrap;gap:8px;}
+.tb-title{font-family:'Orbitron';font-size:14px;font-weight:900;letter-spacing:4px;color:var(--accent);text-shadow:0 0 15px var(--accent);text-transform:uppercase;}
+.tb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tb-stat{font-family:'Orbitron';font-size:10px;letter-spacing:1.5px;color:var(--soft);padding:5px 10px;border:1px solid var(--border);border-radius:4px;background:rgba(0,0,0,.3);}
+.tb-stat b{color:var(--accent);text-shadow:0 0 8px var(--glow);}
+.icon-btn{background:transparent;border:1px solid var(--border);color:var(--accent);width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.icon-btn:hover{background:rgba(0,229,255,.12);box-shadow:0 0 15px var(--glow);}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;padding:22px 26px 40px;position:relative;z-index:2;}
+.content::-webkit-scrollbar{width:6px;}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.panel{display:none;animation:fadeSlide .4s ease;}
+.panel.active{display:block;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.panel-title{font-family:'Orbitron';font-size:13px;letter-spacing:4px;color:var(--accent);text-shadow:0 0 12px var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.panel-title::before{content:'▶';font-size:8px;opacity:.7;}
+.card{background:linear-gradient(145deg,rgba(8,22,40,.9),rgba(4,12,24,.9));border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:14px;backdrop-filter:blur(8px);position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--glow),transparent);opacity:.6;}
+.card-title{font-family:'Orbitron';font-size:11px;letter-spacing:2.5px;color:var(--soft);margin-bottom:12px;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+.motiv{padding:14px 22px 14px 30px;background:linear-gradient(90deg,rgba(0,229,255,.06),transparent);border-left:3px solid var(--accent);border-radius:6px;font-size:13px;font-style:italic;color:var(--soft);line-height:1.55;position:relative;margin-bottom:16px;}
+.motiv::before{content:'"';position:absolute;top:0;left:10px;font-size:36px;opacity:.3;font-family:Georgia,serif;color:var(--accent);}
+.player-hero{display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;padding:22px;background:linear-gradient(145deg,rgba(8,22,40,.95),rgba(4,12,24,.95));border:1px solid var(--border);border-radius:10px;margin-bottom:14px;position:relative;overflow:hidden;}
+.player-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,var(--glow),transparent 60%);opacity:.15;pointer-events:none;}
+@media (max-width:900px){.player-hero{grid-template-columns:1fr;text-align:center;gap:14px;}}
+.player-info h2{font-family:'Orbitron';font-size:26px;font-weight:900;letter-spacing:3px;color:var(--accent);text-shadow:0 0 20px var(--accent);margin-bottom:4px;}
+.player-info .title{font-size:11px;letter-spacing:3px;color:var(--soft);text-transform:uppercase;margin-bottom:6px;}
+.player-info .rank-line{font-family:'Orbitron';font-size:11px;letter-spacing:2px;color:var(--gold);text-shadow:0 0 8px var(--gold);}
+.overall-rank-block{text-align:center;}
+.overall-rank-letter{font-family:'Orbitron';font-size:80px;font-weight:900;line-height:1;text-shadow:0 0 40px currentColor,0 0 80px currentColor;animation:rankGlow 3s infinite alternate;}
+@keyframes rankGlow{from{filter:brightness(1);}to{filter:brightness(1.25);}}
+.overall-rank-label{font-family:'Orbitron';font-size:10px;letter-spacing:4px;color:var(--soft);margin-top:4px;}
+.overall-rank-pct{font-family:'Orbitron';font-size:11px;letter-spacing:1px;color:var(--green);margin-top:8px;text-shadow:0 0 8px var(--green);}
+.xp-wrap-hero{width:100%;max-width:340px;margin-top:12px;}
+.xp-label-hero{display:flex;justify-content:space-between;font-family:'Orbitron';font-size:10px;letter-spacing:1.5px;color:var(--soft);margin-bottom:8px;}
+.xp-label-hero b{color:var(--accent);}
+.xp-track-hero{height:10px;background:rgba(0,229,255,.06);border:1px solid var(--border);border-radius:5px;overflow:hidden;}
+.xp-fill-hero{height:100%;background:linear-gradient(90deg,var(--accent),#fff,var(--accent));background-size:200% 100%;box-shadow:0 0 25px var(--accent);transition:width .7s ease;animation:shineMove 3s linear infinite;}
+@keyframes shineMove{to{background-position:200% 0;}}
+.message-of-day{padding:14px 22px;background:linear-gradient(90deg,rgba(0,255,136,.06),transparent);border-left:3px solid var(--green);border-radius:6px;font-size:13px;color:#e6e6e6;line-height:1.6;margin-bottom:16px;font-style:italic;}
+.attr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:14px;}
+.attr-block{padding:14px 16px;background:linear-gradient(145deg,rgba(8,22,40,.9),rgba(4,12,24,.9));border:1px solid var(--border);border-radius:8px;transition:all .35s;}
+.attr-block:hover{transform:translateY(-3px);box-shadow:0 0 25px rgba(0,229,255,.2);}
+.attr-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.attr-name{font-family:'Orbitron';font-size:12px;letter-spacing:2px;color:var(--accent);display:flex;align-items:center;gap:8px;}
+.attr-rank-badge{font-family:'Orbitron';font-size:22px;font-weight:900;padding:4px 12px;border:2px solid currentColor;border-radius:6px;line-height:1;text-shadow:0 0 12px currentColor;box-shadow:0 0 15px currentColor,inset 0 0 12px currentColor;}
+.attr-progress{height:5px;background:rgba(0,229,255,.08);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+.attr-progress>div{height:100%;border-radius:3px;transition:width .7s ease;box-shadow:0 0 12px currentColor;}
+.attr-meta{display:flex;justify-content:space-between;font-family:'Orbitron';font-size:9px;color:var(--soft);letter-spacing:1px;margin-bottom:8px;}
+.attr-world{font-size:11px;color:#c0c0c0;line-height:1.5;padding:7px 10px;background:rgba(0,229,255,.04);border-left:2px solid var(--accent);border-radius:4px;font-style:italic;}
+.q-prog{display:flex;align-items:center;gap:14px;margin-bottom:14px;font-family:'Orbitron';font-size:12px;letter-spacing:2px;color:var(--soft);}
+.qp-track{flex:1;height:7px;background:rgba(0,229,255,.08);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.qp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));box-shadow:0 0 15px var(--accent);transition:width .6s ease;border-radius:4px;}
+.day-header{padding:12px 16px;background:linear-gradient(90deg,rgba(177,107,255,.1),transparent);border-left:3px solid var(--purple);border-radius:6px;margin-bottom:14px;font-size:13px;color:#e6e6e6;line-height:1.5;}
+.day-header b{color:var(--purple);font-family:'Orbitron';font-size:11px;letter-spacing:2px;}
+.quest{display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:7px;background:linear-gradient(90deg,rgba(0,229,255,.03),rgba(0,229,255,.01));border:1px solid rgba(0,229,255,.15);border-left:4px solid var(--accent);border-radius:6px;cursor:pointer;transition:all .25s;font-size:13px;}
+.quest:hover{background:linear-gradient(90deg,rgba(0,229,255,.1),rgba(0,229,255,.03));transform:translateX(5px);box-shadow:0 0 25px rgba(0,229,255,.2);}
+.quest.done{background:linear-gradient(90deg,rgba(0,255,136,.06),rgba(0,255,136,.01));border-left-color:var(--green);border-color:rgba(0,255,136,.35);cursor:default;}
+.quest.done:hover{transform:none;box-shadow:none;}
+.quest .attr-tag{font-family:'Orbitron';font-size:9px;font-weight:900;padding:3px 7px;border-radius:3px;letter-spacing:1px;flex-shrink:0;}
+.quest .attr-tag.str{background:rgba(255,140,66,.15);color:var(--orange);}
+.quest .attr-tag.agi{background:rgba(0,255,136,.15);color:var(--green);}
+.quest .attr-tag.vit{background:rgba(255,45,85,.15);color:var(--red);}
+.quest .attr-tag.int{background:rgba(177,107,255,.15);color:var(--purple);}
+.quest .attr-tag.per{background:rgba(0,229,255,.15);color:var(--accent);}
+.quest .attr-tag.speech{background:rgba(255,107,181,.15);color:var(--pink);}
+.quest .attr-tag.mem{background:rgba(138,180,248,.15);color:var(--soft);}
+.quest .attr-tag.money{background:rgba(255,204,0,.15);color:var(--gold);}
+.quest .check{width:24px;height:24px;border:2px solid rgba(0,229,255,.5);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0;transition:all .3s;color:transparent;}
+.quest.done .check{border-color:var(--green);background:var(--green);color:#000;box-shadow:0 0 15px var(--green);}
+.quest .qt{flex:1;color:#e6e6e6;}
+.quest.done .qt{text-decoration:line-through;opacity:.5;color:var(--green);}
+.quest .qx{font-family:'Orbitron';font-size:10px;color:var(--soft);letter-spacing:1px;}
+.quest .qs{font-family:'Orbitron';font-size:9px;font-weight:900;letter-spacing:1.5px;color:var(--accent);min-width:90px;text-align:right;}
+.quest.done .qs{color:var(--green);}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:14px;}
+@media (max-width:700px){.week-grid{grid-template-columns:repeat(4,1fr);}}
+.week-day{padding:12px 8px;border:1px solid var(--border);border-radius:6px;text-align:center;background:rgba(0,0,0,.2);transition:all .3s;}
+.week-day.today{border-color:var(--accent);background:rgba(0,229,255,.08);box-shadow:0 0 20px var(--glow);}
+.week-day.weekend{opacity:.65;}
+.week-day .wd-name{font-family:'Orbitron';font-size:10px;letter-spacing:2px;color:var(--soft);margin-bottom:4px;}
+.week-day.today .wd-name{color:var(--accent);}
+.week-day .wd-icon{font-size:22px;margin:6px 0;}
+.week-day .wd-focus{font-size:10px;color:var(--soft);line-height:1.3;}
+.habit-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid rgba(0,229,255,.15);border-radius:6px;margin-bottom:7px;transition:all .2s;}
+.habit-row:hover{background:rgba(0,229,255,.05);}
+.habit-check{width:34px;height:34px;border:2px solid rgba(0,229,255,.5);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;cursor:pointer;transition:all .25s;color:transparent;flex-shrink:0;}
+.habit-check.done{border-color:var(--green);background:var(--green);color:#000;box-shadow:0 0 15px var(--green);}
+.habit-info{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+.habit-name{font-size:13px;color:#e6e6e6;font-weight:600;}
+.habit-row.done .habit-name{opacity:.5;text-decoration:line-through;color:var(--green);}
+.habit-chain{display:flex;gap:3px;flex-wrap:wrap;}
+.habit-chain .c{width:12px;height:12px;border-radius:3px;background:rgba(0,229,255,.15);}
+.habit-chain .c.on{background:var(--green);box-shadow:0 0 6px var(--green);}
+.habit-del{background:transparent;border:1px solid rgba(255,45,85,.4);color:var(--red);width:28px;height:28px;border-radius:5px;cursor:pointer;font-size:12px;flex-shrink:0;}
+.habit-add{display:flex;gap:8px;margin-top:12px;}
+.habit-add input{flex:1;background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--accent);padding:10px 14px;border-radius:5px;font-family:'Lato';font-size:13px;outline:none;}
+.habit-add input:focus{border-color:var(--accent);box-shadow:0 0 15px var(--glow);}
+.will-hero{text-align:center;padding:32px 20px;background:linear-gradient(145deg,rgba(60,10,20,.5),rgba(30,5,10,.7));border:2px solid rgba(255,45,85,.5);border-radius:12px;margin-bottom:14px;position:relative;overflow:hidden;}
+.will-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,45,85,.15),transparent 70%);pointer-events:none;animation:pulse 3s infinite alternate;}
+.will-days{font-family:'Orbitron';font-size:clamp(80px,18vw,160px);font-weight:900;line-height:1;color:#ff6b95;text-shadow:0 0 40px #ff2d55,0 0 80px #ff2d55;margin:10px 0;position:relative;}
+.will-label{font-family:'Orbitron';font-size:14px;letter-spacing:8px;color:#ff8aa0;margin-bottom:14px;position:relative;}
+.will-meta{display:flex;justify-content:center;gap:30px;font-family:'Orbitron';font-size:11px;letter-spacing:2px;color:var(--soft);flex-wrap:wrap;position:relative;}
+.will-meta b{color:#ff6b95;font-size:14px;}
+.will-rank-block{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(0,0,0,.3);border:1px solid rgba(255,45,85,.3);border-radius:8px;margin-bottom:14px;}
+.will-rank-letter{font-family:'Orbitron';font-size:44px;font-weight:900;line-height:1;text-shadow:0 0 25px currentColor;}
+.will-rank-bar{flex:1;margin:0 20px;}
+.will-rank-bar .track{height:8px;background:rgba(255,45,85,.1);border-radius:4px;overflow:hidden;margin-bottom:5px;}
+.will-rank-bar .fill{height:100%;background:linear-gradient(90deg,#ff2d55,#ff6b95,#ffcc00);box-shadow:0 0 15px #ff2d55;transition:width .6s ease;border-radius:4px;}
+.will-rank-bar .info{display:flex;justify-content:space-between;font-family:'Orbitron';font-size:10px;color:var(--soft);}
+.will-quote{padding:20px 24px;background:linear-gradient(145deg,rgba(255,45,85,.06),transparent);border-left:4px solid var(--red);border-radius:8px;margin-bottom:14px;font-style:italic;font-size:14px;color:#ffb8c8;line-height:1.6;position:relative;cursor:pointer;}
+.will-quote::before{content:'"';position:absolute;top:0;left:12px;font-size:44px;opacity:.3;font-family:Georgia;color:var(--red);}
+.will-quote span{display:block;padding-left:20px;}
+.will-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+@media (max-width:600px){.will-actions{grid-template-columns:1fr;}}
+.will-btn{padding:16px 14px;border-radius:8px;cursor:pointer;font-family:'Orbitron';font-size:11px;font-weight:700;letter-spacing:2px;text-align:center;transition:all .3s;border:2px solid;background:transparent;}
+.will-btn.sos{border-color:var(--red);color:var(--red);background:linear-gradient(145deg,rgba(255,45,85,.15),rgba(255,45,85,.05));animation:sosPulse 1.5s infinite;}
+@keyframes sosPulse{from{box-shadow:0 0 10px rgba(255,45,85,.4);}to{box-shadow:0 0 30px rgba(255,45,85,.9);}}
+.will-btn.mark{border-color:var(--green);color:var(--green);background:linear-gradient(145deg,rgba(0,255,136,.1),transparent);}
+.will-btn.fail{border-color:var(--soft);color:var(--soft);background:linear-gradient(145deg,rgba(138,180,248,.08),transparent);}
+.will-trigger-log{padding:10px 14px;background:rgba(0,0,0,.3);border-left:3px solid var(--red);border-radius:5px;margin-bottom:6px;font-size:12px;color:#c0c0c0;display:flex;justify-content:space-between;gap:10px;}
+.will-trigger-log b{color:var(--red);font-family:'Orbitron';font-size:10px;}
+.timer-display{font-family:'Orbitron';font-size:clamp(56px,14vw,110px);font-weight:900;text-align:center;color:var(--accent);text-shadow:0 0 45px var(--accent);letter-spacing:6px;margin:20px 0;line-height:1;}
+.timer-display.break{color:var(--green);text-shadow:0 0 45px var(--green);}
+.timer-mode{text-align:center;font-family:'Orbitron';font-size:13px;letter-spacing:8px;color:var(--soft);margin-bottom:14px;}
+.timer-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.timer-stats{display:flex;justify-content:center;gap:32px;margin-top:22px;font-family:'Orbitron';font-size:11px;letter-spacing:1.5px;color:var(--soft);flex-wrap:wrap;}
+.timer-stats b{color:var(--accent);font-size:14px;}
+.journal textarea{width:100%;min-height:180px;background:rgba(0,0,0,.5);border:1px solid var(--border);color:#e6e6e6;font-family:'Lato';font-size:13px;line-height:1.65;padding:14px;border-radius:6px;resize:vertical;outline:none;}
+.journal textarea:focus{border-color:var(--accent);box-shadow:0 0 20px rgba(0,229,255,.25);}
+.journal-meta{display:flex;justify-content:space-between;font-family:'Orbitron';font-size:10px;color:var(--soft);margin-top:8px;flex-wrap:wrap;gap:8px;}
+.journal-list{display:grid;gap:7px;margin-top:10px;}
+.journal-entry{padding:11px 15px;background:rgba(0,229,255,.03);border-left:3px solid var(--accent);border-radius:5px;font-size:12px;color:#b0b0b0;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.journal-entry:hover{background:rgba(0,229,255,.1);transform:translateX(4px);}
+.journal-entry b{color:var(--accent);font-family:'Orbitron';font-size:10px;margin-right:8px;}
+.tracks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:16px;}
+.track{padding:13px 15px;border:1px solid var(--border);background:rgba(0,229,255,.03);border-radius:8px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:10px;}
+.track:hover{transform:translateY(-3px);box-shadow:0 0 25px var(--glow);border-color:var(--accent);}
+.track.playing{border-color:var(--green);background:rgba(0,255,136,.1);box-shadow:0 0 30px rgba(0,255,136,.4);}
+.track-icon{font-size:24px;}
+.track-name{font-family:'Orbitron';font-size:11px;letter-spacing:2px;color:var(--accent);margin-bottom:3px;}
+.track.playing .track-name{color:var(--green);}
+.track-desc{font-size:10px;color:var(--soft);line-height:1.4;}
+.music-player{display:flex;align-items:center;gap:14px;padding:14px 18px;background:rgba(8,22,40,.95);border:1px solid var(--border);border-radius:8px;flex-wrap:wrap;}
+.music-visual{display:flex;align-items:flex-end;gap:3px;height:26px;min-width:50px;}
+.music-visual .bar{width:4px;background:var(--accent);border-radius:2px;transition:height .15s;}
+.volume-slider{-webkit-appearance:none;width:110px;height:4px;background:rgba(0,229,255,.2);border-radius:2px;outline:none;}
+.volume-slider::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--accent);border-radius:50%;cursor:pointer;box-shadow:0 0 10px var(--accent);}
+.speech-block{padding:16px;border:1px solid var(--border);border-radius:8px;margin-bottom:10px;background:rgba(0,0,0,.2);}
+.speech-block h4{font-family:'Orbitron';font-size:12px;letter-spacing:2px;color:var(--pink);margin-bottom:8px;}
+.speech-block p{font-size:12px;color:#c0c0c0;line-height:1.6;margin-bottom:6px;}
+.speech-list{list-style:none;font-size:12px;color:var(--soft);line-height:1.7;padding-left:8px;}
+.speech-list li::before{content:'◆ ';color:var(--pink);font-size:9px;margin-right:4px;}
+.poem-card,.tongue-card,.skill-card,.course-card{padding:12px 14px;border:1px solid rgba(138,180,248,.3);background:rgba(138,180,248,.06);border-radius:6px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.poem-card:hover,.tongue-card:hover,.skill-card:hover,.course-card:hover{background:rgba(138,180,248,.12);transform:translateX(4px);}
+.poem-card.done,.tongue-card.done,.skill-card.done,.course-card.done{border-color:var(--green);background:rgba(0,255,136,.08);cursor:default;}
+.poem-name,.tongue-name,.skill-name,.course-name{font-family:'Orbitron';font-size:11px;letter-spacing:1.5px;color:var(--soft);margin-bottom:3px;}
+.poem-author,.tongue-desc,.skill-desc,.course-desc{font-size:10px;color:var(--soft);opacity:.7;font-style:italic;}
+.poem-card.done .poem-name,.tongue-card.done .tongue-name,.skill-card.done .skill-name,.course-card.done .course-name{color:var(--green);text-decoration:line-through;opacity:.6;}
+.money-stat{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,229,255,.08);}
+.money-stat .lbl{color:var(--soft);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;}
+.money-stat .val{color:var(--accent);font-family:'Orbitron';font-weight:700;font-size:14px;}
+.money-stat .val.gold{color:var(--gold);font-size:16px;}
+.exam-block{padding:18px 20px;border:1px solid var(--border);background:rgba(0,229,255,.03);border-radius:8px;margin-bottom:12px;position:relative;}
+.exam-block.due{border-color:var(--gold);background:rgba(255,204,0,.06);box-shadow:0 0 25px rgba(255,204,0,.3);}
+.exam-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;flex-wrap:wrap;}
+.exam-title{font-family:'Orbitron';font-size:12px;letter-spacing:2px;color:var(--accent);}
+.exam-rank{font-family:'Orbitron';font-size:14px;font-weight:900;}
+.exam-desc{font-size:12px;color:var(--soft);line-height:1.55;margin-bottom:10px;}
+.exam-status{font-family:'Orbitron';font-size:10px;letter-spacing:1.5px;color:var(--soft);}
+.exam-status.good{color:var(--green);}
+.exam-status.warn{color:var(--gold);}
+.exam-status.bad{color:var(--red);}
+.exam-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.goal-row{padding:14px 16px;border:1px solid var(--border);background:rgba(0,0,0,.2);border-radius:8px;margin-bottom:10px;}
+.goal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.goal-title{font-family:'Orbitron';font-size:12px;letter-spacing:2px;color:var(--accent);}
+.goal-value{font-family:'Orbitron';font-size:14px;font-weight:700;color:var(--green);}
+.goal-track{height:8px;background:rgba(0,229,255,.08);border-radius:4px;overflow:hidden;margin-bottom:6px;}
+.goal-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));box-shadow:0 0 12px var(--accent);transition:width .6s ease;border-radius:4px;}
+.goal-meta{display:flex;justify-content:space-between;font-family:'Orbitron';font-size:9px;color:var(--soft);letter-spacing:1px;}
+.legion-item{padding:12px 16px;background:rgba(0,229,255,.03);border-left:3px solid var(--accent);border-radius:5px;margin-bottom:6px;font-size:12px;color:#c0c0c0;display:flex;justify-content:space-between;gap:10px;}
+.legion-item b{color:var(--accent);font-family:'Orbitron';font-size:10px;margin-right:8px;}
+.legion-item .v{color:var(--green);font-family:'Orbitron';font-weight:700;font-size:11px;}
+/* ПРОГРЕСС */
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
+.stat-card{padding:16px 14px;background:linear-gradient(145deg,rgba(8,22,40,.9),rgba(4,12,24,.9));border:1px solid var(--border);border-radius:8px;text-align:center;transition:all .35s;}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 0 25px rgba(0,229,255,.2);}
+.stat-card .sc-icon{font-size:22px;margin-bottom:6px;filter:drop-shadow(0 0 8px var(--accent));}
+.stat-card .sc-value{font-family:'Orbitron';font-size:24px;font-weight:900;color:var(--accent);text-shadow:0 0 12px var(--glow);line-height:1;}
+.stat-card .sc-label{font-family:'Orbitron';font-size:9px;letter-spacing:2px;color:var(--soft);margin-top:8px;text-transform:uppercase;}
+.stat-card.green .sc-value{color:var(--green);}
+.stat-card.gold .sc-value{color:var(--gold);}
+.stat-card.red .sc-value{color:var(--red);}
+.range-tabs{display:flex;gap:4px;}
+.range-btn{padding:5px 10px;background:rgba(0,229,255,.04);border:1px solid var(--border);color:var(--soft);font-family:'Orbitron';font-size:10px;font-weight:600;letter-spacing:1px;cursor:pointer;border-radius:4px;transition:all .2s;}
+.range-btn:hover{color:var(--accent);border-color:var(--accent);}
+.range-btn.active{background:rgba(0,229,255,.15);color:var(--accent);border-color:var(--accent);box-shadow:0 0 10px var(--glow);}
+.big-chart{padding:14px;background:rgba(0,0,0,.25);border-radius:8px;position:relative;}
+.big-chart svg{display:block;width:100%;height:auto;overflow:visible;}
+.big-chart svg .grid-line{stroke:rgba(0,229,255,.08);stroke-width:1;}
+.big-chart svg .axis-text{font-family:'Orbitron';font-size:9px;fill:var(--soft);letter-spacing:1px;}
+.big-chart svg .chart-line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;transition:all .3s;}
+.big-chart svg .chart-area{opacity:.25;}
+.big-chart svg .chart-point{fill:var(--accent);r:3;cursor:pointer;transition:all .2s;}
+.big-chart svg .chart-point:hover{r:6;filter:drop-shadow(0 0 8px var(--accent));}
+.chart-tooltip{position:absolute;pointer-events:none;background:rgba(3,9,18,.98);border:1px solid var(--accent);border-radius:6px;padding:8px 12px;font-family:'Orbitron';font-size:11px;color:var(--accent);box-shadow:0 0 20px var(--glow);opacity:0;transition:opacity .2s;white-space:nowrap;z-index:100;transform:translate(-50%,-120%);}
+.chart-tooltip.show{opacity:1;}
+.chart-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid rgba(0,229,255,.1);}
+.chart-stats .cs-item{text-align:center;}
+.chart-stats .cs-val{font-family:'Orbitron';font-size:16px;font-weight:700;color:var(--accent);}
+.chart-stats .cs-lbl{font-family:'Orbitron';font-size:9px;color:var(--soft);letter-spacing:1.5px;margin-top:4px;}
+.chart-legend{display:flex;gap:10px;flex-wrap:wrap;font-family:'Orbitron';font-size:9px;letter-spacing:1px;color:var(--soft);}
+.chart-legend span{display:flex;align-items:center;gap:4px;}
+.chart-legend .dot{width:9px;height:9px;border-radius:50%;}
+.heatmap-year{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;padding:8px 4px;overflow-x:auto;background:rgba(0,0,0,.2);border-radius:6px;}
+.heatmap-year::-webkit-scrollbar{height:6px;}
+.heatmap-year::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.hm-year-cell{width:12px;height:12px;border-radius:2px;background:rgba(0,229,255,.04);transition:all .2s;cursor:pointer;}
+.hm-year-cell:hover{transform:scale(1.5);z-index:10;}
+.hm-year-cell[data-lvl="1"]{background:rgba(0,229,255,.25);}
+.hm-year-cell[data-lvl="2"]{background:rgba(0,229,255,.5);}
+.hm-year-cell[data-lvl="3"]{background:rgba(0,229,255,.75);}
+.hm-year-cell[data-lvl="4"]{background:var(--accent);box-shadow:0 0 6px var(--accent);}
+.heatmap-legend{display:flex;align-items:center;gap:8px;font-family:'Orbitron';font-size:9px;color:var(--soft);letter-spacing:1px;padding:10px 4px 0;justify-content:flex-end;}
+.hm-scale{display:flex;gap:3px;}
+.hm-dot{width:12px;height:12px;border-radius:2px;background:rgba(0,229,255,.04);}
+.hm-dot[data-lvl="1"]{background:rgba(0,229,255,.25);}
+.hm-dot[data-lvl="2"]{background:rgba(0,229,255,.5);}
+.hm-dot[data-lvl="3"]{background:rgba(0,229,255,.75);}
+.hm-dot[data-lvl="4"]{background:var(--accent);}
+.timeline-item{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,229,255,.08);align-items:center;}
+.timeline-item:last-child{border-bottom:none;}
+.timeline-dot{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron';font-weight:900;font-size:15px;flex-shrink:0;border:2px solid currentColor;text-shadow:0 0 10px currentColor;box-shadow:0 0 12px currentColor;}
+.timeline-info{flex:1;min-width:0;}
+.timeline-title{font-family:'Orbitron';font-size:11px;letter-spacing:1.5px;color:var(--accent);margin-bottom:3px;}
+.timeline-date{font-family:'Orbitron';font-size:10px;color:var(--soft);letter-spacing:1px;}
+.wc-row{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,229,255,.08);font-size:12px;}
+.wc-left{text-align:right;font-family:'Orbitron';font-size:14px;color:var(--soft);}
+.wc-label{font-family:'Orbitron';font-size:9px;letter-spacing:2px;color:var(--soft);text-align:center;min-width:120px;}
+.wc-right{font-family:'Orbitron';font-size:14px;font-weight:700;}
+.wc-right.up{color:var(--green);}
+.wc-right.down{color:var(--red);}
+.wc-right.same{color:var(--soft);}
+/* ЦИТАТЫ */
+.quote-display{padding:24px 28px;background:linear-gradient(145deg,rgba(177,107,255,.08),rgba(255,45,85,.04));border:1px solid rgba(177,107,255,.4);border-radius:10px;margin-bottom:14px;position:relative;overflow:hidden;text-align:center;}
+.quote-display::before{content:'❝';position:absolute;top:6px;left:16px;font-size:56px;opacity:.2;font-family:Georgia;color:var(--purple);}
+.quote-text{font-family:'Orbitron';font-size:clamp(14px,2.2vw,18px);font-weight:600;letter-spacing:2px;color:#e6e6e6;line-height:1.7;text-shadow:0 0 12px var(--glow);margin-bottom:12px;position:relative;}
+.quote-author{font-family:'Orbitron';font-size:10px;letter-spacing:3px;color:var(--purple);text-shadow:0 0 8px var(--purple);}
+.quote-actions{display:flex;gap:8px;justify-content:center;margin-top:14px;}
+.quote-list-item{padding:14px 18px;background:rgba(177,107,255,.03);border-left:3px solid var(--purple);border-radius:6px;margin-bottom:8px;cursor:pointer;transition:all .2s;}
+.quote-list-item:hover{background:rgba(177,107,255,.1);transform:translateX(4px);}
+.quote-list-text{font-size:13px;color:#e6e6e6;font-style:italic;line-height:1.5;margin-bottom:4px;}
+.quote-list-author{font-family:'Orbitron';font-size:9px;letter-spacing:2px;color:var(--purple);}
+.btn{padding:10px 18px;background:transparent;border:1px solid var(--border);color:var(--accent);font-family:'Orbitron';font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border-radius:5px;transition:all .3s;}
+.btn:hover{background:rgba(0,229,255,.12);box-shadow:0 0 22px var(--glow);transform:translateY(-2px);}
+.btn.danger{border-color:var(--red);color:var(--red);}
+.btn.gold{border-color:var(--gold);color:var(--gold);}
+.btn.green{border-color:var(--green);color:var(--green);}
+.btn.red{border-color:#ff6b95;color:#ff6b95;}
+.btn.purple{border-color:var(--purple);color:var(--purple);}
+.btn.full{width:100%;}
+.btn.sm{padding:7px 12px;font-size:10px;}
+.notif{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-140px);background:rgba(3,9,18,.98);border:1px solid var(--accent);padding:13px 26px;color:var(--accent);font-family:'Orbitron';font-weight:700;letter-spacing:2.5px;text-transform:uppercase;font-size:11px;box-shadow:0 0 45px var(--glow);border-radius:6px;opacity:0;transition:all .5s cubic-bezier(.2,.9,.3,1.4);pointer-events:none;z-index:9000;white-space:nowrap;max-width:90vw;overflow:hidden;text-overflow:ellipsis;}
+.notif.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.notif.gold{border-color:var(--gold);color:var(--gold);}
+.notif.red{border-color:var(--red);color:var(--red);}
+.notif.green{border-color:var(--green);color:var(--green);}
+.notif.purple{border-color:var(--purple);color:var(--purple);}
+#sysVoice{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.7);z-index:9800;background:linear-gradient(145deg,rgba(6,18,34,.98),rgba(3,9,18,.99));border:2px solid var(--purple);padding:32px 40px;border-radius:14px;max-width:min(640px,92vw);opacity:0;pointer-events:none;transition:all .6s cubic-bezier(.2,.9,.3,1.4);box-shadow:0 0 80px rgba(177,107,255,.6),0 0 160px rgba(177,107,255,.3);text-align:center;}
+#sysVoice.show{opacity:1;pointer-events:all;transform:translate(-50%,-50%) scale(1);}
+#sysVoice::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent);animation:pulse 1.5s infinite alternate;}
+.sv-header{font-family:'Orbitron';font-size:11px;letter-spacing:6px;color:var(--soft);margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.sv-header::before,.sv-header::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(177,107,255,.4),transparent);max-width:80px;}
+.sv-text{font-family:'Orbitron';font-size:clamp(15px,2.6vw,20px);font-weight:700;letter-spacing:2px;color:#fff;line-height:1.6;text-shadow:0 0 20px var(--purple);margin-bottom:12px;}
+.sv-sub{font-size:12px;color:var(--soft);letter-spacing:1px;line-height:1.6;font-style:italic;}
+#rankup,#penalty,#modal{position:fixed;inset:0;z-index:9500;display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity .4s ease;padding:20px;}
+#rankup{background:radial-gradient(circle at center,rgba(255,204,0,.25) 0%,rgba(0,0,0,.98) 70%);}
+#rankup.show{opacity:1;pointer-events:all;}
+.rank-big{font-family:'Orbitron';font-size:clamp(140px,28vw,320px);font-weight:900;line-height:1;letter-spacing:20px;animation:rankIn 2s ease;text-align:center;}
+@keyframes rankIn{0%{transform:scale(.2) rotate(-15deg);opacity:0;filter:blur(30px);}50%{transform:scale(1.15) rotate(3deg);opacity:1;filter:blur(0);}100%{transform:scale(1);opacity:1;}}
+#rankup .rank-title{font-family:'Orbitron';font-size:clamp(14px,2.5vw,22px);font-weight:700;letter-spacing:8px;color:#fff;margin-top:14px;text-align:center;}
+#rankup .rank-sub{font-family:'Orbitron';font-size:13px;letter-spacing:3px;color:var(--gold);margin-top:16px;text-align:center;max-width:600px;line-height:1.6;padding:0 20px;}
+#penalty{background:radial-gradient(circle at center,rgba(255,45,85,.2) 0%,rgba(0,0,0,.98) 70%);}
+#penalty.show{opacity:1;pointer-events:all;}
+.pen-title{font-family:'Orbitron';font-size:clamp(30px,7vw,60px);font-weight:900;letter-spacing:8px;color:var(--red);text-shadow:0 0 30px var(--red);}
+.pen-sub{font-family:'Orbitron';font-size:13px;letter-spacing:3px;color:#ff8aa0;margin-top:20px;text-align:center;padding:0 20px;line-height:1.6;max-width:500px;}
+#modal{background:rgba(0,0,0,.9);backdrop-filter:blur(10px);}
+#modal.show{opacity:1;pointer-events:all;}
+.modal-card{background:rgba(4,12,24,.98);border:1px solid var(--accent);border-radius:12px;padding:26px;max-width:560px;width:100%;box-shadow:0 0 60px var(--glow);max-height:85vh;overflow-y:auto;text-align:center;position:relative;}
+.modal-title{font-family:'Orbitron';font-size:15px;letter-spacing:4px;color:var(--accent);text-shadow:0 0 15px var(--accent);margin-bottom:16px;}
+.modal-body{font-size:13px;line-height:1.75;color:#e6e6e6;margin-bottom:18px;text-align:left;}
+.shake{animation:shakeIt .5s cubic-bezier(.36,.07,.19,.97);}
+@keyframes shakeIt{10%,90%{transform:translate(-3px,2px);}20%,80%{transform:translate(5px,-3px);}30%,50%,70%{transform:translate(-7px,4px);}40%,60%{transform:translate(7px,-4px);}}
+.particle{position:fixed;width:5px;height:5px;border-radius:50%;pointer-events:none;z-index:9600;}
+.fly-xp{position:fixed;font-family:'Orbitron';font-weight:900;font-size:18px;color:var(--green);text-shadow:0 0 15px var(--green);pointer-events:none;z-index:9700;}
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid rgba(0,229,255,.08);gap:14px;flex-wrap:wrap;}
+.setting-label{font-family:'Orbitron';font-size:11px;letter-spacing:1.5px;color:var(--soft);text-transform:uppercase;}
+.setting-input,.setting-select{background:rgba(0,0,0,.5);border:1px solid var(--border);color:var(--accent);padding:8px 12px;border-radius:5px;font-family:'Lato';font-size:13px;outline:none;min-width:160px;}
+.setting-input:focus{border-color:var(--accent);box-shadow:0 0 15px var(--glow);}
+.setting-select option{background:#060f1c;color:#e6e6e6;}
+.color-pick{width:50px;height:32px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:transparent;padding:2px;}
+@media (max-width:800px){
+    #app{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+    .sidebar{flex-direction:row;overflow-x:auto;overflow-y:hidden;padding:8px;border-right:none;border-bottom:1px solid var(--border);gap:3px;}
+    .sidebar::-webkit-scrollbar{height:3px;}
+    .sb-logo{padding:6px 10px;border-bottom:none;border-right:1px solid var(--border);margin-bottom:0;flex-shrink:0;}
+    .sb-logo .name{display:none;}
+    .nav{flex-direction:row;gap:2px;}
+    .nav-item{padding:8px 10px;white-space:nowrap;border-left:none;border-bottom:3px solid transparent;font-size:11px;}
+    .nav-item.active{border-left:none;border-bottom-color:var(--accent);}
+    .nav-item:not(.active) span:not(.ni):not(.badge){display:none;}
+    .sb-footer{display:none;}
+    .content{padding:16px 12px 40px;}
+    .topbar{padding:10px 12px;}
+    .tb-title{font-size:12px;letter-spacing:3px;}
+    .player-hero{grid-template-columns:1fr;text-align:center;padding:16px;gap:14px;}
+    .player-info h2{font-size:18px;}
+    .overall-rank-letter{font-size:60px;}
+    .attr-grid{grid-template-columns:1fr;}
+    .quest{padding:11px 12px;font-size:12px;gap:8px;flex-wrap:wrap;}
+    .quest .qx{display:none;}
+    .quest .qs{min-width:70px;font-size:8px;}
+    .week-grid{grid-template-columns:repeat(4,1fr);}
+    .will-actions{grid-template-columns:1fr;}
+    #sysVoice{padding:22px 24px;}
+}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div id="bgGrid"></div>
+<div id="bgVignette"></div>
+<div id="aura"></div>
+
+<div id="boot">
+    <div class="boot-logo">СИСТЕМА</div>
+    <div class="boot-bar"><div id="bootBar"></div></div>
+    <div class="boot-log" id="bootLog">ИНИЦИАЛИЗАЦИЯ...</div>
+</div>
+
+<div id="app">
+    <aside class="sidebar">
+        <div class="sb-logo"><span class="mark">⚙</span><span class="name">MONARCH</span></div>
+        <nav class="nav">
+            <div class="nav-item active" data-nav="status"><span class="ni">📊</span><span>Статус</span></div>
+            <div class="nav-item" data-nav="quests"><span class="ni">⚔</span><span>Квесты</span><span class="badge" id="navBadge" style="display:none">!</span></div>
+            <div class="nav-item" data-nav="will"><span class="ni">🔥</span><span>Воля</span><span class="badge red" id="willBadge">0</span></div>
+            <div class="nav-item" data-nav="progress"><span class="ni">📈</span><span>Прогресс</span></div>
+            <div class="nav-item" data-nav="quotes"><span class="ni">💬</span><span>Цитаты</span></div>
+            <div class="nav-item" data-nav="week"><span class="ni">📅</span><span>Неделя</span></div>
+            <div class="nav-item" data-nav="habits"><span class="ni">🎯</span><span>Привычки</span></div>
+            <div class="nav-item" data-nav="speech"><span class="ni">🗣</span><span>Речь</span></div>
+            <div class="nav-item" data-nav="memory"><span class="ni">🎭</span><span>Память</span></div>
+            <div class="nav-item" data-nav="money"><span class="ni">💰</span><span>Деньги</span></div>
+            <div class="nav-item" data-nav="goals"><span class="ni">🎯</span><span>Цели</span></div>
+            <div class="nav-item" data-nav="exams"><span class="ni">🏅</span><span>Экзамены</span></div>
+            <div class="nav-item" data-nav="legion"><span class="ni">📜</span><span>Летопись</span></div>
+            <div class="nav-item" data-nav="focus"><span class="ni">⏱</span><span>Фокус</span></div>
+            <div class="nav-item" data-nav="journal"><span class="ni">📓</span><span>Дневник</span></div>
+            <div class="nav-item" data-nav="music"><span class="ni">🎵</span><span>Музыка</span></div>
+            <div class="nav-item" data-nav="settings"><span class="ni">⚙</span><span>Настройки</span></div>
+        </nav>
+        <div class="sb-footer"><div class="sb-clock" id="sbClock">--:--:--</div></div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div class="tb-title" id="pageTitle">СТАТУС</div>
+            <div class="tb-right">
+                <div class="tb-stat">РАНГ <b id="tbRank">E</b></div>
+                <div class="tb-stat">🔥 <b id="tbStreak">0</b></div>
+                <div class="tb-stat">XP <b id="tbXP">0</b></div>
+                <button class="icon-btn" id="themeBtn" title="Тема">◐</button>
+                <button class="icon-btn" id="soundBtn" title="Звук">🔊</button>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- СТАТУС -->
+            <div class="panel active" id="panel-status">
+                <div class="motiv" id="motivText">Система активирована.</div>
+                <div class="player-hero">
+                    <div class="player-info">
+                        <h2 id="pName">Кирилл</h2>
+                        <div class="title" id="pTitle">ПРОБУЖДЁННЫЙ</div>
+                        <div class="rank-line" id="pRankLine">РАНГ: E · ТОП 70%</div>
+                        <div class="xp-wrap-hero">
+                            <div class="xp-label-hero"><span>ПРОГРЕСС ДНЯ</span><b><span id="xpText">0</span> XP</b></div>
+                            <div class="xp-track-hero"><div class="xp-fill-hero" id="xpFill" style="width:0%"></div></div>
+                        </div>
+                    </div>
+                    <div class="overall-rank-block">
+                        <div class="overall-rank-letter" id="overallRank">E</div>
+                        <div class="overall-rank-label">ОБЩИЙ РАНГ</div>
+                        <div class="overall-rank-pct" id="overallPct">топ 70% мира</div>
+                    </div>
+                </div>
+                <div class="message-of-day" id="messageOfDay">Каждый день — шаг.</div>
+                <div class="attr-grid" id="attrGrid"></div>
+                <div class="card">
+                    <div class="card-title">▶ СЕЗОН</div>
+                    <div id="seasonBlock"></div>
+                </div>
+            </div>
+
+            <!-- КВЕСТЫ -->
+            <div class="panel" id="panel-quests">
+                <div class="panel-title">ЕЖЕДНЕВНЫЙ КВЕСТ</div>
+                <div class="day-header" id="dayHeader"></div>
+                <div class="q-prog"><span id="qCount">0/0</span><div class="qp-track"><div class="qp-fill" id="qpFill" style="width:0%"></div></div><span id="qPct">0%</span></div>
+                <div id="challengeBlock"></div>
+                <div id="questList"></div>
+                <button class="btn full danger" id="resetDayBtn" style="margin-top:14px">⟲ ЗАКРЫТЬ ДЕНЬ</button>
+            </div>
+
+            <!-- ВОЛЯ -->
+            <div class="panel" id="panel-will">
+                <div class="panel-title">ВОЗДЕРЖАНИЕ · ВОЛЯ</div>
+                <div class="will-hero">
+                    <div class="will-label">◆ ДНЕЙ ЧИСТОТЫ ◆</div>
+                    <div class="will-days" id="willDays">0</div>
+                    <div class="will-meta">
+                        <div>РЕКОРД: <b id="willRecord">0</b></div>
+                        <div>СПАСЕНО: <b id="willSaves">0</b></div>
+                        <div>СРЫВОВ: <b id="willFails">0</b></div>
+                    </div>
+                </div>
+                <div class="will-rank-block">
+                    <div class="will-rank-letter" id="willRankLetter">E</div>
+                    <div class="will-rank-bar">
+                        <div class="track"><div class="fill" id="willRankFill" style="width:0%"></div></div>
+                        <div class="info"><span id="willRankInfo">0 / 7</span><span id="willRankNext">ДО D</span></div>
+                    </div>
+                </div>
+                <div class="will-quote" id="willQuoteBox"><span id="willQuote">Загрузка...</span></div>
+                <div class="will-actions">
+                    <button class="will-btn sos" id="willSosBtn">⚡ СРОЧНО</button>
+                    <button class="will-btn mark" id="willMarkBtn">✔ ОТМЕТИТЬ ДЕНЬ</button>
+                    <button class="will-btn fail" id="willFailBtn">✕ Я СОРВАЛСЯ</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ДНЕВНИК ТРИГГЕРОВ</div>
+                    <div class="habit-add" style="margin-bottom:10px;">
+                        <input id="triggerInput" placeholder="Что было? (стресс/скучно/один/ночь)">
+                        <button class="btn sm red" id="triggerBtn">+ ЗАПИСАТЬ</button>
+                    </div>
+                    <div id="triggerList"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ЛОГ ПОЛЬЗЫ (РАЗ В НЕДЕЛЮ)</div>
+                    <div class="setting-row"><span class="setting-label">Фокус (1-10)</span><input class="setting-input" id="logFocus" type="number" min="1" max="10" value="5" style="width:80px;min-width:80px;"></div>
+                    <div class="setting-row"><span class="setting-label">Энергия (1-10)</span><input class="setting-input" id="logEnergy" type="number" min="1" max="10" value="5" style="width:80px;min-width:80px;"></div>
+                    <div class="setting-row"><span class="setting-label">Сила в зале (1-10)</span><input class="setting-input" id="logPower" type="number" min="1" max="10" value="5" style="width:80px;min-width:80px;"></div>
+                    <button class="btn full green" id="logSaveBtn" style="margin-top:10px;">💾 СОХРАНИТЬ</button>
+                    <div id="logList" style="margin-top:12px;"></div>
+                </div>
+            </div>
+
+            <!-- ПРОГРЕСС -->
+            <div class="panel" id="panel-progress">
+                <div class="panel-title">ПРОГРЕСС</div>
+                <div class="stat-cards" id="statCards"></div>
+                <div class="card">
+                    <div class="card-title">
+                        <span>▶ ДИНАМИКА XP</span>
+                        <span class="range-tabs">
+                            <button class="range-btn" data-range="7">7Д</button>
+                            <button class="range-btn active" data-range="30">30Д</button>
+                            <button class="range-btn" data-range="90">90Д</button>
+                            <button class="range-btn" data-range="365">1Г</button>
+                        </span>
+                    </div>
+                    <div class="big-chart">
+                        <svg id="progressMainChart" viewBox="0 0 800 280" preserveAspectRatio="none"></svg>
+                        <div id="chartTooltip" class="chart-tooltip"></div>
+                    </div>
+                    <div class="chart-stats" id="chartStats"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">
+                        <span>▶ РОСТ 8 АТРИБУТОВ</span>
+                        <span class="chart-legend" id="attrsLegend"></span>
+                    </div>
+                    <div class="big-chart"><svg id="progressAttrsChart" viewBox="0 0 800 320" preserveAspectRatio="none"></svg></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ HEATMAP ГОДА</div>
+                    <div class="heatmap-year" id="heatmapYear"></div>
+                    <div class="heatmap-legend">
+                        <span>Меньше</span>
+                        <div class="hm-scale"><div class="hm-dot" data-lvl="0"></div><div class="hm-dot" data-lvl="1"></div><div class="hm-dot" data-lvl="2"></div><div class="hm-dot" data-lvl="3"></div><div class="hm-dot" data-lvl="4"></div></div>
+                        <span>Больше</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ TIMELINE РАНГОВ</div>
+                    <div id="rankTimeline"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ЭТА НЕДЕЛЯ vs ПРОШЛАЯ</div>
+                    <div id="weekCompare"></div>
+                </div>
+            </div>
+
+            <!-- ЦИТАТЫ -->
+            <div class="panel" id="panel-quotes">
+                <div class="panel-title">ЦИТАТЫ СИЛЫ</div>
+                <div class="quote-display">
+                    <div class="quote-text" id="currentQuoteText">Загрузка...</div>
+                    <div class="quote-author" id="currentQuoteAuthor">— СИСТЕМА</div>
+                </div>
+                <div class="quote-actions">
+                    <button class="btn purple" id="quoteNextBtn">◆ СЛЕДУЮЩАЯ</button>
+                    <button class="btn green" id="quoteSpeakBtn">🔊 ОЗВУЧИТЬ</button>
+                    <button class="btn gold" id="quoteCopyBtn">📋 СКОПИРОВАТЬ</button>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ВСЕ ЦИТАТЫ</div>
+                    <div id="quotesList" style="max-height:500px;overflow-y:auto;"></div>
+                </div>
+            </div>
+
+            <!-- НЕДЕЛЯ -->
+            <div class="panel" id="panel-week">
+                <div class="panel-title">НЕДЕЛЬНЫЙ РИТМ</div>
+                <div class="week-grid" id="weekGrid"></div>
+                <div class="card">
+                    <div class="card-title">▶ ЧТО ЗНАЧИТ КАЖДЫЙ ДЕНЬ</div>
+                    <div style="font-size:12px;color:#c0c0c0;line-height:1.8;">
+                        <p><b style="color:var(--accent);">ПН · ВЕРХ ТЕЛА</b> — зал, жим/тяга, речь</p>
+                        <p><b style="color:var(--accent);">ВТ · НИЗ ТЕЛА</b> — зал, присед, память</p>
+                        <p><b style="color:var(--accent);">СР · ВОССТАНОВЛЕНИЕ</b> — растяжка, прогулка, деньги</p>
+                        <p><b style="color:var(--accent);">ЧТ · ВЕРХ ТЕЛА</b> — зал, жим, речь</p>
+                        <p><b style="color:var(--accent);">ПТ · НИЗ + КАРДИО</b> — зал лёгкий + длинная пробежка</p>
+                        <p><b style="color:var(--accent);">СБ · РАЗВИТИЕ</b> — отдых, деньги, стих</p>
+                        <p><b style="color:var(--accent);">ВС · ОТДЫХ</b> — восстановление, дневник</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ПРИВЫЧКИ -->
+            <div class="panel" id="panel-habits">
+                <div class="panel-title">ПРИВЫЧКИ</div>
+                <div class="card">
+                    <div id="habitList"></div>
+                    <div class="habit-add">
+                        <input id="habitInput" placeholder="Новая привычка...">
+                        <button class="btn sm green" id="habitAddBtn">+ ДОБАВИТЬ</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- РЕЧЬ -->
+            <div class="panel" id="panel-speech">
+                <div class="panel-title">РАЗВИТИЕ РЕЧИ</div>
+                <div class="card">
+                    <div class="card-title">▶ УПРАЖНЕНИЯ НА Р (20 МИН)</div>
+                    <div class="speech-block"><h4>1. РАЗОГРЕВ (5 мин)</h4><ul class="speech-list"><li>«Грибок» — 10 сек × 5</li><li>«Лошадка» — 30 сек × 3</li><li>«Чашечка» — 20 сек × 3</li><li>«Моторчик» — 15 сек × 5</li></ul></div>
+                    <div class="speech-block"><h4>2. СЛОГИ (5 мин)</h4><p>РА-РО-РУ-РЫ-РЭ · АР-ОР-УР-ЫР-ЭР · ДРА-ДРО-ДРУ · ТРА-ТРО-ТРУ · КРА-КРО-КРУ</p></div>
+                    <div class="speech-block"><h4>3. СКОРОГОВОРКИ (5 мин)</h4><ul class="speech-list"><li>На дворе трава, на траве дрова</li><li>Карл у Клары украл кораллы</li><li>Тридцать три корабля лавировали</li><li>Рыба в реке, рак в реке, река в Ростове</li><li>Рапортовал, да не дорапортовал</li></ul></div>
+                    <div class="speech-block"><h4>4. ЧТЕНИЕ ВСЛУХ (5 мин)</h4><p>Медленно, чётко, каждое Р вибрирует.</p></div>
+                </div>
+                <div class="card"><div class="card-title">▶ ПРОГРЕСС СКОРОГОВОРОК</div><div id="tongueList"></div></div>
+            </div>
+
+            <!-- ПАМЯТЬ -->
+            <div class="panel" id="panel-memory">
+                <div class="panel-title">ПАМЯТЬ · СТИХИ</div>
+                <div class="card"><div class="card-title">▶ СТИХИ НА ИЗУЧЕНИЕ</div><div id="poemsList"></div></div>
+                <div class="card"><div class="card-title">▶ МНЕМОТЕХНИКИ (мини-курс)</div><div id="mnemoList"></div></div>
+            </div>
+
+            <!-- ДЕНЬГИ -->
+            <div class="panel" id="panel-money">
+                <div class="panel-title">ЗАРАБОТОК · TELEGRAM ADS</div>
+                <div class="card">
+                    <div class="money-stat"><span class="lbl">ЧАСОВ ИЗУЧЕНИЯ</span><span class="val" id="moneyStudyHours">0</span></div>
+                    <div class="money-stat"><span class="lbl">КЛИЕНТОВ</span><span class="val" id="moneyClients">0</span></div>
+                    <div class="money-stat"><span class="lbl">ЗАРАБОТАНО</span><span class="val gold" id="moneyEarned">$0</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ЛОГ ДЕЙСТВИЙ</div>
+                    <div class="habit-add" style="margin-bottom:8px;">
+                        <input id="moneyLogInput" placeholder="изучил 30 мин / написал клиенту / $50">
+                        <button class="btn sm gold" id="moneyLogBtn">+ ЗАПИСАТЬ</button>
+                    </div>
+                    <div id="moneyLogList" style="max-height:300px;overflow-y:auto;"></div>
+                </div>
+                <div class="card"><div class="card-title">▶ МИНИ-КУРС: 20 УРОКОВ</div><div id="moneyCourseList"></div></div>
+            </div>
+
+            <!-- ЦЕЛИ -->
+            <div class="panel" id="panel-goals">
+                <div class="panel-title">РЕАЛЬНЫЕ ЦЕЛИ</div>
+                <div id="goalsList"></div>
+            </div>
+
+            <!-- ЭКЗАМЕНЫ -->
+            <div class="panel" id="panel-exams">
+                <div class="panel-title">ЭКЗАМЕНЫ РАНГА</div>
+                <div style="font-size:12px;color:var(--soft);margin-bottom:14px;line-height:1.6;">Раз в 3–6 месяцев — проверка. Напоминание за 7 дней.</div>
+                <div id="examsList"></div>
+            </div>
+
+            <!-- ЛЕТОПИСЬ -->
+            <div class="panel" id="panel-legion">
+                <div class="panel-title">ЛЕТОПИСЬ ОХОТНИКА</div>
+                <div id="legionList"></div>
+            </div>
+
+            <!-- ФОКУС -->
+            <div class="panel" id="panel-focus">
+                <div class="panel-title">ПОМОДОРО</div>
+                <div class="card">
+                    <div class="timer-mode" id="timerMode">ФОКУС · 25:00</div>
+                    <div class="timer-display" id="timerDisplay">25:00</div>
+                    <div class="timer-btns">
+                        <button class="btn" id="timerStart">▶ СТАРТ</button>
+                        <button class="btn" id="timerReset">⟲ СБРОС</button>
+                        <button class="btn gold" id="timerSkip">⏭ ПРОПУСТИТЬ</button>
+                    </div>
+                    <div class="timer-stats">
+                        <div>СЕГОДНЯ: <b id="sessToday">0</b></div>
+                        <div>ВСЕГО: <b id="sessTotal">0</b></div>
+                        <div>XP: <b id="sessXP">+15</b></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ДНЕВНИК -->
+            <div class="panel" id="panel-journal">
+                <div class="panel-title">ДНЕВНИК</div>
+                <div class="card journal">
+                    <div class="card-title">▶ ЗАПИСЬ · <span id="journalDate"></span></div>
+                    <textarea id="journalText" placeholder="Что сделал? Что понял? Что чувствуешь?"></textarea>
+                    <div class="journal-meta"><span id="journalSaved">Автосохранение</span><span id="journalChars">0 символов</span></div>
+                </div>
+                <div class="card"><div class="card-title">▶ ПРОШЛЫЕ ЗАПИСИ</div><div class="journal-list" id="journalList"></div></div>
+            </div>
+
+            <!-- МУЗЫКА -->
+            <div class="panel" id="panel-music">
+                <div class="panel-title">МУЗЫКА СИСТЕМЫ</div>
+                <div class="tracks-grid" id="tracksGrid"></div>
+                <div class="music-player">
+                    <div class="music-visual" id="musicVisual"><div class="bar" style="height:20%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:60%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:20%"></div></div>
+                    <div style="flex:1;min-width:150px;"><div style="font-family:'Orbitron';font-size:12px;letter-spacing:2px;color:var(--accent);" id="nowPlaying">НЕ ВОСПРОИЗВОДИТСЯ</div></div>
+                    <button class="icon-btn" id="musicPlayBtn">▶</button>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+                </div>
+            </div>
+
+            <!-- НАСТРОЙКИ -->
+            <div class="panel" id="panel-settings">
+                <div class="panel-title">НАСТРОЙКИ</div>
+                <div class="card">
+                    <div class="card-title">▶ ПРОФИЛЬ</div>
+                    <div class="setting-row"><span class="setting-label">Имя</span><input class="setting-input" id="nameInput" value="Кирилл"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ТЕМА И ЦВЕТ</div>
+                    <div class="setting-row"><span class="setting-label">Предустановка</span>
+                        <select class="setting-select" id="themeSelect">
+                            <option value="cyan">Cyan · Классика</option>
+                            <option value="red">Red · Монарх</option>
+                            <option value="gold">Gold · Император</option>
+                            <option value="purple">Purple · Тень</option>
+                        </select>
+                    </div>
+                    <div class="setting-row"><span class="setting-label">Свой акцент</span><input type="color" class="color-pick" id="colorPick" value="#00e5ff"></div>
+                    <div class="setting-row"><span class="setting-label">Сбросить</span><button class="btn sm" id="resetColorBtn">СБРОС</button></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ГОЛОС СИСТЕМЫ</div>
+                    <div style="font-size:12px;color:var(--soft);line-height:1.6;margin-bottom:12px;">Система сама пишет цитаты и озвучивает их. Тон меняется от состояния.</div>
+                    <div class="setting-row"><span class="setting-label">Спонтанные сообщения</span><button class="btn sm" id="voiceBtn">ВКЛ</button></div>
+                    <div class="setting-row"><span class="setting-label">Голосовое озвучивание</span><button class="btn sm" id="ttsBtn">ВКЛ</button></div>
+                    <div class="setting-row"><span class="setting-label">Частота</span>
+                        <select class="setting-select" id="voiceFreqSelect">
+                            <option value="low">Редко</option>
+                            <option value="medium" selected>Средне</option>
+                            <option value="high">Часто</option>
+                        </select>
+                    </div>
+                    <div class="setting-row"><span class="setting-label">Проверить сейчас</span><button class="btn sm green" id="voiceTestBtn">ВЫЗВАТЬ</button></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ИГРА</div>
+                    <div class="setting-row"><span class="setting-label">Режим МОНАРХ</span><button class="btn sm" id="monarchBtn">ВЫКЛ</button></div>
+                    <div class="setting-row"><span class="setting-label">Штрафы</span><button class="btn sm" id="penaltyBtn">ВКЛ</button></div>
+                    <div class="setting-row"><span class="setting-label">Кулдаун 2 квеста/час</span><button class="btn sm" id="cooldownBtn">ВКЛ</button></div>
+                    <div class="setting-row"><span class="setting-label">Звук</span><button class="btn sm" id="soundToggleBtn">ВКЛ</button></div>
+                    <div class="setting-row"><span class="setting-label">Вибрация</span><button class="btn sm" id="vibrateBtn">ВКЛ</button></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">▶ ДАННЫЕ</div>
+                    <button class="btn full gold" id="exportBtn" style="margin-bottom:8px">⬇ ЭКСПОРТ JSON</button>
+                    <button class="btn full" id="importBtn" style="margin-bottom:8px">⬆ ИМПОРТ JSON</button>
+                    <input type="file" id="importFile" accept=".json" style="display:none">
+                    <button class="btn full danger" id="wipeBtn">⚠ ПОЛНЫЙ СБРОС</button>
+                </div>
+                <div style="text-align:center;font-family:'Orbitron';font-size:10px;letter-spacing:3px;color:var(--soft);padding:20px;">ВЕРСИЯ 12.0 · MONARCH</div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="sysVoice"><div class="sv-header">◆ СИСТЕМА ◆</div><div class="sv-text" id="svText"></div><div class="sv-sub" id="svSub"></div></div>
+<div id="rankup"><div class="rank-big" id="rankBigLetter">S</div><div class="rank-title" id="rankTitleText">РАНГ</div><div class="rank-sub" id="rankSubText"></div></div>
+<div id="penalty"><div class="pen-title">⚠ ШТРАФ</div><div class="pen-sub" id="penaltyText"></div></div>
+<div id="modal"><div class="modal-card"><div class="modal-title" id="modalTitle"></div><div class="modal-body" id="modalBody"></div><button class="btn full green" id="modalOk">ОК</button></div></div>
+<div class="notif" id="notif">ГОТОВО</div>
+
+<script>
+/* CORE */
+const RANKS=['E','D','C','B','A','S'];
+const RANK_COLORS={E:'#8ab4f8',D:'#00ff88',C:'#00e5ff',B:'#b16bff',A:'#ff8c42',S:'#ffcc00'};
+const RANK_XP={E:0,D:200,C:500,B:1000,A:2000,S:4000};
+const RANK_PERCENT={E:'топ 70% мира',D:'топ 40% мира',C:'топ 15% мира',B:'топ 5% мира',A:'топ 1% мира',S:'топ 0.1% мира'};
+const WILL_XP={E:0,D:7,C:14,B:30,A:60,S:90};
+const ATTRS={str:{icon:'⚔',name:'СИЛА',color:'#ff8c42'},agi:{icon:'🏃',name:'ЛОВКОСТЬ',color:'#00ff88'},vit:{icon:'🛡',name:'ВЫНОСЛИВОСТЬ',color:'#ff2d55'},int:{icon:'🧠',name:'ИНТЕЛЛЕКТ',color:'#b16bff'},per:{icon:'👁',name:'ВОСПРИЯТИЕ',color:'#00e5ff'},speech:{icon:'🗣',name:'РЕЧЬ',color:'#ff6bb5'},mem:{icon:'🎭',name:'ПАМЯТЬ',color:'#8ab4f8'},money:{icon:'💰',name:'ЗАРАБОТОК',color:'#ffcc00'}};
+const ATTR_MEANING={str:{E:'10 отжиманий.',D:'20 отжиманий, 5 подтягиваний.',C:'40 отжиманий, 10 подтягиваний.',B:'60 отжиманий, 15 подтягиваний.',A:'80 отжиманий, 25 подтягиваний.',S:'100+ отжиманий, 30+ подтягиваний.'},agi:{E:'100м за 18 сек.',D:'100м за 15 сек.',C:'100м за 13 сек. Шпагат продольный.',B:'100м за 12 сек. Полный шпагат.',A:'100м за 11 сек.',S:'100м за 10.5 сек.'},vit:{E:'1 км без остановки.',D:'3 км.',C:'5 км.',B:'10 км.',A:'21 км полумарафон.',S:'42 км марафон.'},int:{E:'1 книга в месяц.',D:'2 книги в месяц.',C:'4 книги + курс.',B:'1 книга в неделю + 2 навыка.',A:'50+ книг за год.',S:'Эксперт в 3+ областях.'},per:{E:'5 мин медитации.',D:'15 мин.',C:'30 мин + осознанность.',B:'1 час + телесные практики.',A:'2 часа.',S:'Глубокое присутствие.'},speech:{E:'Картавит Р.',D:'Р с трудом.',C:'Чистое Р в словах.',B:'Чистое Р везде.',A:'Оратор.',S:'Голос диктора.'},mem:{E:'Не помнит 5 чисел.',D:'5 чисел.',C:'7 чисел. 3–5 стихов.',B:'8 чисел. 10 стихов.',A:'9 чисел. 15+ стихов.',S:'10 чисел. 20+ стихов.'},money:{E:'Нет дохода.',D:'Изучаешь Telegram Ads.',C:'Первый клиент.',B:'$500/мес.',A:'$2000/мес.',S:'$10000+/мес.'}};
+const DAY_PLANS={1:{name:'ПОНЕДЕЛЬНИК',focus:'ВЕРХ + РЕЧЬ',icon:'💪',quests:[{id:'morning',text:'Утренний ритуал (душ + вис + растяжка)',xp:15,attrs:['vit','per']},{id:'gym',text:'Зал · ВЕРХ',xp:30,attrs:['str']},{id:'speech',text:'Речь · 20 мин',xp:25,attrs:['speech']},{id:'read',text:'Чтение 30 мин',xp:20,attrs:['int']},{id:'water',text:'Вода 2 литра',xp:10,attrs:['vit']},{id:'sleep',text:'Сон 7–8 часов',xp:15,attrs:['per']}]},2:{name:'ВТОРНИК',focus:'НИЗ + ПАМЯТЬ',icon:'🦵',quests:[{id:'morning',text:'Утренний ритуал',xp:15,attrs:['vit','per']},{id:'gym',text:'Зал · НИЗ',xp:30,attrs:['str']},{id:'memory',text:'Память · стих 15 мин',xp:25,attrs:['mem']},{id:'money',text:'Telegram Ads · 30 мин',xp:30,attrs:['money']},{id:'water',text:'Вода 2 литра',xp:10,attrs:['vit']},{id:'sleep',text:'Сон 7–8 часов',xp:15,attrs:['per']}]},3:{name:'СРЕДА',focus:'ВОССТАНОВЛЕНИЕ + ДЕНЬГИ',icon:'🧘',quests:[{id:'morning',text:'Утренний ритуал',xp:15,attrs:['vit','per']},{id:'walk',text:'Прогулка 30 мин',xp:15,attrs:['vit']},{id:'money',text:'Telegram Ads · 60 мин',xp:40,attrs:['money']},{id:'read',text:'Чтение 30 мин',xp:20,attrs:['int']},{id:'water',text:'Вода 2 литра',xp:10,attrs:['vit']},{id:'sleep',text:'Сон 7–8 часов',xp:15,attrs:['per']}]},4:{name:'ЧЕТВЕРГ',focus:'ВЕРХ + РЕЧЬ',icon:'💪',quests:[{id:'morning',text:'Утренний ритуал',xp:15,attrs:['vit','per']},{id:'gym',text:'Зал · ВЕРХ',xp:30,attrs:['str']},{id:'speech',text:'Речь · 20 мин',xp:25,attrs:['speech']},{id:'read',text:'Чтение 30 мин',xp:20,attrs:['int']},{id:'water',text:'Вода 2 литра',xp:10,attrs:['vit']},{id:'sleep',text:'Сон 7–8 часов',xp:15,attrs:['per']}]},5:{name:'ПЯТНИЦА',focus:'НИЗ + КАРДИО',icon:'🏃',quests:[{id:'morning',text:'Утренний ритуал',xp:15,attrs:['vit','per']},{id:'gym',text:'Зал · НИЗ (лёгкий)',xp:20,attrs:['str']},{id:'run',text:'Длинная пробежка (60+ мин)',xp:40,attrs:['vit']},{id:'read',text:'Чтение 20 мин',xp:15,attrs:['int']},{id:'water',text:'Вода 2 литра',xp:10,attrs:['vit']},{id:'sleep',text:'Сон 7–8 часов',xp:15,attrs:['per']}]},6:{name:'СУББОТА',focus:'РАЗВИТИЕ',icon:'📚',quests:[{id:'morning',text:'Утренний ритуал',xp:15,attrs:['vit','per']},{id:'walk',text:'Активное восстановление',xp:15,attrs:['vit']},{id:'money',text:'Telegram Ads · 60 мин',xp:40,attrs:['money']},{id:'memory',text:'Память · стих 15 мин',xp:25,attrs:['mem']},{id:'read',text:'Чтение 30 мин',xp:20,attrs:['int']},{id:'sleep',text:'Сон 7–8 часов',xp:15,attrs:['per']}]},0:{name:'ВОСКРЕСЕНЬЕ',focus:'ОТДЫХ',icon:'😴',quests:[{id:'morning',text:'Утренний ритуал (лёгкий)',xp:10,attrs:['per']},{id:'rest',text:'Полный отдых',xp:10,attrs:['per']},{id:'journal',text:'Дневник · итоги недели',xp:25,attrs:['int']},{id:'plan',text:'Планирование недели',xp:20,attrs:['int']},{id:'sleep',text:'Сон 8+ часов',xp:20,attrs:['per']}]}};
+const POEMS=[{id:'p1',name:'Если жизнь тебя обманет',author:'А.С. Пушкин',lines:8},{id:'p2',name:'Анчар',author:'А.С. Пушкин',lines:32},{id:'p3',name:'Парус',author:'М.Ю. Лермонтов',lines:12},{id:'p4',name:'Не жалею, не зову, не плачу',author:'С.А. Есенин',lines:20},{id:'p5',name:'Я вас любил',author:'А.С. Пушкин',lines:8},{id:'p6',name:'Silentium',author:'Ф.И. Тютчев',lines:20},{id:'p7',name:'Послушайте',author:'В.В. Маяковский',lines:30}];
+const TONGUE=[{id:'t1',name:'НА ДВОРЕ ТРАВА',desc:'Базовый. Разогрев.'},{id:'t2',name:'КАРЛ У КЛАРЫ',desc:'Р + Л.'},{id:'t3',name:'ТРИДЦАТЬ ТРИ КОРАБЛЯ',desc:'Три Р подряд.'},{id:'t4',name:'РЫБА В РЕКЕ',desc:'Р в разных позициях.'},{id:'t5',name:'РАПОРТОВАЛ',desc:'Сложная.'},{id:'t6',name:'ШЛА САША ПО ШОССЕ',desc:'Ш + С.'}];
+const MNEMO=[{id:'m1',name:'ДВОРЕЦ ПАМЯТИ',desc:'Привязка к местам'},{id:'m2',name:'ЦЕПОЧКА',desc:'Связка через ассоциации'},{id:'m3',name:'АССОЦИАЦИИ',desc:'Образ на слово'},{id:'m4',name:'ЦИФРО-ОБРАЗ',desc:'Цифра = предмет'},{id:'m5',name:'АКРОСТИХ',desc:'Первая буква = ключ'},{id:'m6',name:'ПОВТОРЕНИЕ 1-3-7-14',desc:'Метод Лейтнера'}];
+const MONEY_COURSE=[{id:'c1',name:'УРОК 1: Что такое Telegram Ads'},{id:'c2',name:'УРОК 2: Рекламный кабинет'},{id:'c3',name:'УРОК 3: CPM, CTR, CAC'},{id:'c4',name:'УРОК 4: Целевая аудитория'},{id:'c5',name:'УРОК 5: Выбор ниши'},{id:'c6',name:'УРОК 6: Креативы'},{id:'c7',name:'УРОК 7: Заголовки'},{id:'c8',name:'УРОК 8: Бюджет'},{id:'c9',name:'УРОК 9: Аналитика'},{id:'c10',name:'УРОК 10: Оптимизация CTR'},{id:'c11',name:'УРОК 11: Оффер'},{id:'c12',name:'УРОК 12: Работа с клиентом'},{id:'c13',name:'УРОК 13: Договор'},{id:'c14',name:'УРОК 14: Отчёты'},{id:'c15',name:'УРОК 15: Масштаб'},{id:'c16',name:'УРОК 16: Воронка'},{id:'c17',name:'УРОК 17: Повторные продажи'},{id:'c18',name:'УРОК 18: Новые клиенты'},{id:'c19',name:'УРОК 19: Личный бренд'},{id:'c20',name:'УРОК 20: Экзамен'}];
+const EXAMS=[{id:'str',attr:'str',name:'СИЛА',desc:'1ПМ жим × вес · подтягивания · отжимания',months:3},{id:'agi',attr:'agi',name:'ЛОВКОСТЬ',desc:'Спринт 100м · гибкость',months:6},{id:'vit',attr:'vit',name:'ВЫНОСЛИВОСТЬ',desc:'5 км на время · планка',months:3},{id:'int',attr:'int',name:'ИНТЕЛЛЕКТ',desc:'Книги · пересказ',months:6},{id:'per',attr:'per',name:'ВОСПРИЯТИЕ',desc:'Медитация 30 мин',months:3},{id:'speech',attr:'speech',name:'РЕЧЬ',desc:'3 мин монолог · чистота Р',months:6},{id:'mem',attr:'mem',name:'ПАМЯТЬ',desc:'10 чисел · стих',months:6},{id:'money',attr:'money',name:'ЗАРАБОТОК',desc:'Доход $/мес',months:3}];
+const GOALS=[{id:'g1',name:'МАССА ТЕЛА',start:68,current:69,target:75,unit:'кг'},{id:'g2',name:'КАРДИО',start:5,current:11.5,target:21,unit:'км'},{id:'g3',name:'ПЕРВЫЙ КЛИЕНТ',start:0,current:0,target:1,unit:'чел'},{id:'g4',name:'ДОХОД',start:0,current:0,target:1000,unit:'$'},{id:'g5',name:'РАНГ S СИЛА',start:0,current:0,target:4000,unit:'XP'}];
+const CHALLENGES=[{t:'30 отжиманий. Сейчас.',xp:50},{t:'50 приседаний.',xp:50},{t:'5 мин холодного душа.',xp:40},{t:'Пересказ книги 2 мин.',xp:60},{t:'10 мин без телефона.',xp:30},{t:'Медитация 5 мин.',xp:40},{t:'Прогулка 15 мин.',xp:35},{t:'1 мин записи речи.',xp:45},{t:'10 новых слов.',xp:50}];
+
+/* ЦИТАТЫ СИЛЬНОЙ АУРЫ */
+const QUOTES=[
+{t:'Дерево, которое хочет вырасти до небес, должно отправить свои корни в ад.',a:'Карл Юнг'},
+{t:'Я либо найду способ, либо создам его.',a:'Ганнибал Барка'},
+{t:'Я не боюсь того, кто изучал 10000 ударов. Я боюсь того, кто изучал один удар 10000 раз.',a:'Брюс Ли'},
+{t:'Стань тем, кого боятся враги. Стань тем, кого боятся друзья. Стань собой.',a:'Система'},
+{t:'Слабые умирают. Сильные растут. Никто не придёт и не спасёт тебя, кроме тебя самого.',a:'Система'},
+{t:'Лучше быть воином в саду, чем садовником на войне.',a:'Древняя мудрость'},
+{t:'Дисциплина — это мост между целью и результатом.',a:'Джим Рон'},
+{t:'Ты либо найдёшь способ, либо найдёшь оправдание. Одно из двух.',a:'Джим Рон'},
+{t:'Сначала они не замечают тебя. Потом смеются. Потом борются. Потом ты побеждаешь.',a:'Махатма Ганди'},
+{t:'Если ты не идёшь в ад, ты никогда не узнаешь, кто ты на самом деле.',a:'Неизвестный'},
+{t:'Каждый день в зале — это не тренировка тела. Это тренировка духа.',a:'Система'},
+{t:'Мозг, привыкший к быстрым наградам, не построит долгих побед.',a:'Система'},
+{t:'Твоё тело — храм. Твой ум — оружие. Твоя воля — стена.',a:'Система'},
+{t:'Тот, кто хочет — ищет возможность. Тот, кто не хочет — причину.',a:'Сократ'},
+{t:'Страдание временно. Слабость навсегда.',a:'Система'},
+{t:'Пока другие спят — ты поднимаешься. Пока другие едят — ты тренируешься. Пока другие плачут — ты растёшь.',a:'Система'},
+{t:'Никто не придёт. Ты сам — своё спасение. Запомни это.',a:'Система'},
+{t:'Боль неизбежна. Страдание — выбор.',a:'Харуки Мураками'},
+{t:'Упади семь раз — встань восемь.',a:'Японская пословица'},
+{t:'Дорога в тысячу миль начинается с одного шага.',a:'Лао-цзы'},
+{t:'Если ты устал — отдохни. Но не сдавайся.',a:'Бэнкэй'},
+{t:'Успех — это сумма малых усилий, повторяемых день за днём.',a:'Роберт Кольер'},
+{t:'Я не проигрываю. Я либо побеждаю, либо учусь.',a:'Нельсон Мандела'},
+{t:'Кто не поднимается, тот падает. Третьего нет.',a:'Система'},
+{t:'Ты не рождён слабым. Ты им стал. И ты перестанешь.',a:'Система'},
+{t:'Каждая капля пота — кирпич в крепость, которую ты строишь.',a:'Система'},
+{t:'В момент боли растёт тот, кто остаётся.',a:'Система'},
+{t:'Ты — не то, что с тобой случилось. Ты — то, что ты выбираешь делать.',a:'Карл Юнг'},
+{t:'Страх — это топливо, а не тормоз. Зажги его.',a:'Система'},
+{t:'Один процент каждый день — это 37 раз за год.',a:'Джеймс Клир'},
+{t:'Стань опасен. Для слабости внутри себя.',a:'Система'},
+{t:'Не бойся одиночества на пути. Бойся оказаться в плохой компании.',a:'Сенека'},
+{t:'Всякая боль — это рост. Всякая слабость — это выбор.',a:'Система'},
+{t:'Жизнь — это война. Проигрывает тот, кто перестал сражаться.',a:'Система'},
+{t:'Тот, у кого есть «зачем», вынесет почти любое «как».',a:'Фридрих Ницше'},
+{t:'Всё, что тебя не убивает — делает сильнее. Если ты выберешь это.',a:'Ницше / Система'},
+{t:'Тело — это отражение дисциплины. Ум — отражение воли.',a:'Система'},
+{t:'Ты не найдёшь себя. Ты себя создашь.',a:'Томас Сас'},
+{t:'Никогда не сдавайся. Потому что не знаешь, что на следующей странице.',a:'Неизвестный'},
+{t:'Каждый отказ от слабости — кирпич в твою крепость.',a:'Система'},
+{t:'Ты тот, кто ты есть, потому что ты решил им быть.',a:'Система'},
+{t:'Сила воли — это мышца. Тренируй её каждый день.',a:'Система'},
+{t:'Не важно, как медленно ты идёшь. Важно, что не останавливаешься.',a:'Конфуций'},
+{t:'Первый шаг убивает 90% сомнений.',a:'Система'},
+{t:'Я либо найду способ, либо создам его — третьего не дано.',a:'Система'},
+{t:'Если бы это было легко — это не было бы ценно.',a:'Система'},
+{t:'Тот, кто боится смерти — не живёт. Тот, кто боится боли — не растёт.',a:'Система'},
+{t:'Дисциплина важнее мотивации. Мотивация проходит — дисциплина остаётся.',a:'Джим Рон'},
+{t:'Боль временна. Слава вечна.',a:'Древний девиз'},
+{t:'Каждое утро — реванш вчерашнему себе.',a:'Система'},
+{t:'Сделай то, что должен. Даже если весь мир против.',a:'Марк Аврелий'},
+{t:'Помни: ты умрёшь. Это делает тебя свободным.',a:'Марк Аврелий'},
+{t:'Ты сильнее, чем думаешь. И слабее, чем мог бы быть. Иди и стань.',a:'Система'},
+{t:'Тот, кто может умереть за что-то — живёт по-настоящему.',a:'Система'},
+{t:'Никогда не оправдывайся. Оправдание — это лазейка для слабости.',a:'Система'},
+{t:'Стань легендой, которую будут рассказывать шёпотом.',a:'Система'},
+{t:'Твой враг — вчерашний ты. Победи его каждый день.',a:'Система'},
+{t:'Уровень твоей жизни = уровень твоей дисциплины.',a:'Система'},
+{t:'Одна минута боли — год силы. Одна минута слабости — год сожаления.',a:'Система'},
+{t:'Только тот, кто идёт сквозь тьму, достоин увидеть свет.',a:'Система'}
+];
+const WILL_QUOTES_A=['Каждый день воздержания — тренировка воли. Воля — это мышца.','Ты не теряешь удовольствие. Ты обмениваешь 10 минут на годы силы.','Мозг, привыкший к быстрым наградам, не может строить долгие цели.','Твоя энергия — валюта. Куда ты её тратишь — там ты растёшь.','Наполеон, Тесла, Ньютон, Толстой — воздерживались. Совпадение?','Сексуальная энергия — это топливо. Преврати её в действие.','90 дней изменят твою жизнь. Один момент слабости откатит.','Ты хочешь быть сильнейшим? Побеждай себя каждый день.','Слабый ищет удовольствие. Сильный ищет силу.','Твоё тело — храм. Не оскверняй его ради мгновения.','Каждый день чистоты — кирпич в основание твоей крепости.','Воздержание — это не запрет. Это перенос энергии в мощь.'];
+const WILL_QUOTES_B=['СТОП. Встань. 20 отжиманий. СЕЙЧАС.','Это не ты. Это мозг требует дозу. 15 минут пройдёт.','Ты уже столько дней. Сольёшь за 5 минут?','Позор длится дольше, чем удовольствие.','Что ты почувствуешь через час? Пустоту.','Холодный душ. 2 минуты. Ты выйдешь другим.','90 дней силы против 5 минут слабости.','Проиграешь сейчас — сгоришь перед собой.','Ты — охотник. Охотники не рабы.','Импульс длится 10 минут. Переживи — победил.','Ты сильнее этого. Докажи.','Вспомни, кем ты хочешь стать.'];
+const SYS_VOICES={motivate:[{t:'ВСТАВАЙ.',s:'Действие важнее мыслей.'},{t:'ОДИН ШАГ ВПЕРЁД.',s:'Просто один. Прямо сейчас.'},{t:'СИСТЕМА ВИДИТ ВСЁ.',s:'Каждое действие записано.'},{t:'СЕГОДНЯ ИЛИ НИКОГДА.',s:'Нет «завтра».'},{t:'ДИСЦИПЛИНА = СВОБОДА.',s:'Ты строишь крепость.'},{t:'НИКТО НЕ ПРИДЁТ.',s:'Ты сам — своё спасение.'},{t:'ТЫ СИЛЬНЕЕ, ЧЕМ ДУМАЕШЬ.',s:'Докажи это.'},{t:'БОЛЬ — ЭТО РОСТ.',s:'Иди сквозь неё.'},{t:'СТАНЬ ОПАСЕН.',s:'Для слабости внутри.'},{t:'ТВОЙ ВРАГ — ВЧЕРАШНИЙ ТЫ.',s:'Победи его.'}],observe:[{t:'СЕРИЯ {st} ДНЕЙ.',s:'Рекорд близко.'},{t:'ТЫ НА РАНГЕ {r}.',s:'Ещё немного — взлёт.'},{t:'{h} ЧАСОВ ДНЯ.',s:'Что сделано?'},{t:'СИЛЬНОЕ: {strong}.',s:'Слабое: {weak}.'},{t:'ПОМОДОРО: {pomo}.',s:'Фокус — твоё оружие.'}],challenge:[{t:'БРОСОК.',s:'30 отжиманий. Сейчас.'},{t:'ВЫЗОВ.',s:'10 страниц книги.'},{t:'ПРОВЕРКА.',s:'Медитация 5 минут.'},{t:'ЗАДАНИЕ.',s:'Холодный душ.'},{t:'МИССИЯ.',s:'10 минут без телефона.'},{t:'ВОЛЯ.',s:'50 приседаний. Сейчас.'}],warning:[{t:'ВНИМАНИЕ.',s:'Квест дня не закрыт.'},{t:'ТРЕВОГА.',s:'Ритм сбивается.'},{t:'ОСТАНОВКА.',s:'Не теряй серию.'},{t:'СИСТЕМА НАБЛЮДАЕТ.',s:'Мало времени до конца дня.'}],fail:[{t:'ПАДЕНИЕ — НЕ КОНЕЦ.',s:'Возвращайся. Прямо сейчас.'},{t:'СЛАБОСТЬ ВЫБРАНА.',s:'Но следующий день — твой.'},{t:'ПОЗОР ВРЕМЕНЕН.',s:'Действие очищает.'}],will:[{t:'ВОЛЯ — ЭТО СИЛА.',s:'Ты на пути охотника.'},{t:'ДЕНЬ {wd} ЧИСТОТЫ.',s:'Каждый день делает сильнее.'},{t:'ЭНЕРГИЯ КОПИТСЯ.',s:'Направь её в тренировку.'}]};
+const TRACKS={focus:{name:'ФОКУС',icon:'🎯',desc:'Глубокий гул',bpm:60,wave:'sine',scale:[110,130.81,146.83,164.81,196,220,261.63,293.66],pattern:[0,2,4,6,4,2,0,2,4,6,7,6,4,2,0,2],vol:.045,pad:true},flow:{name:'ПОТОК',icon:'💧',desc:'Творчество',bpm:75,wave:'triangle',scale:[130.81,146.83,164.81,196,220,261.63,293.66,329.63],pattern:[0,1,3,5,7,5,3,1,0,3,5,7,5,3,1,0],vol:.04,pad:true},epic:{name:'ЭПИК',icon:'⚡',desc:'Мощь',bpm:90,wave:'sawtooth',scale:[82.41,110,123.47,164.81,196,220,246.94,329.63],pattern:[0,2,3,5,7,5,3,2,0,3,5,7,5,3,2,0],vol:.032,pad:true},dark:{name:'ТЬМА',icon:'🌑',desc:'Сложное',bpm:48,wave:'sine',scale:[73.42,82.41,98,110,123.47,146.83],pattern:[0,1,3,5,3,1,0,3,1,4,3,1,0,1,3,5],vol:.055,pad:true},dawn:{name:'РАССВЕТ',icon:'🌅',desc:'Утро',bpm:68,wave:'triangle',scale:[130.81,146.83,164.81,196,220,261.63,329.63,392],pattern:[0,2,4,6,7,6,4,2,0,2,4,6,7,6,4,2],vol:.04,pad:true},training:{name:'ТРЕНИРОВКА',icon:'💪',desc:'Спорт',bpm:128,wave:'square',scale:[73.42,82.41,98,110,123.47,146.83],pattern:[0,0,2,0,3,0,2,0,4,0,3,0,2,0,1,0],vol:.03,pad:false},zen:{name:'ДЗЕН',icon:'🧘',desc:'Медитация',bpm:30,wave:'sine',scale:[65.41,82.41,98,123.47,130.81,164.81],pattern:[0,1,2,3,4,3,2,1,0,2,3,4,5,4,3,2],vol:.06,pad:true},night:{name:'НОЧЬ',icon:'🌙',desc:'Отдых',bpm:42,wave:'sine',scale:[82.41,98,123.47,146.83,164.81],pattern:[0,1,2,3,4,3,2,1,0,1,2,3,2,1,0,0],vol:.05,pad:true}};
+const MOTIVATIONS=['Я один поднялся. Я один и продолжу.','Слабые умирают. Сильные растут.','Каждый день — экзамен.','Ты либо растёшь, либо умираешь.','Система видит всё.','Боль временна. Слабость — навсегда.','Стань тем, кого боятся враги.','Дисциплина — форма свободы.','Пока другие спят — ты поднимаешься.','Уровни не дают. Уровни берут.'];
+
+/* MUSIC */
+class MusicEngine{constructor(){this.ctx=null;this.master=null;this.padOsc=null;this.current=null;this.playing=false;this.interval=null;this.step=0;this.volume=.5;}ensure(){if(!this.ctx){try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();this.master=this.ctx.createGain();this.master.gain.value=this.volume;this.master.connect(this.ctx.destination);}catch(e){return null}}if(this.ctx.state==='suspended')this.ctx.resume();return this.ctx}play(id){this.stop();const t=TRACKS[id];if(!t)return;const ctx=this.ensure();if(!ctx)return;this.current=id;this.playing=true;this.step=0;if(t.pad){this.padOsc=ctx.createOscillator();const g=ctx.createGain();this.padOsc.type='sine';this.padOsc.frequency.value=t.scale[0];g.gain.value=t.vol*.6;this.padOsc.connect(g);g.connect(this.master);this.padOsc.start()}const stepMs=(60/t.bpm)/2*1000;this.interval=setInterval(()=>this.stepFn(),stepMs);this.stepFn()}stepFn(){const t=TRACKS[this.current];if(!t||!this.playing)return;const ctx=this.ctx;const idx=t.pattern[this.step%t.pattern.length];const freq=t.scale[idx];const osc=ctx.createOscillator();const gain=ctx.createGain();osc.type=t.wave;osc.frequency.value=freq;const now=ctx.currentTime;const dur=60/t.bpm*.9;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(t.vol,now+.02);gain.gain.exponentialRampToValueAtTime(.0001,now+dur);osc.connect(gain);gain.connect(this.master);osc.start(now);osc.stop(now+dur+.1);if(this.step%4===0){const b=ctx.createOscillator();const bg=ctx.createGain();b.type='sine';b.frequency.value=freq/2;bg.gain.setValueAtTime(0,now);bg.gain.linearRampToValueAtTime(t.vol*.8,now+.02);bg.gain.exponentialRampToValueAtTime(.0001,now+dur*1.8);b.connect(bg);bg.connect(this.master);b.start(now);b.stop(now+dur*2)}this.step++}stop(){this.playing=false;if(this.interval){clearInterval(this.interval);this.interval=null}if(this.padOsc){try{this.padOsc.stop()}catch(e){}this.padOsc=null}this.current=null}setVolume(v){this.volume=v;if(this.master)this.master.gain.value=v}}
+const music=new MusicEngine();
+
+/* UTIL */
+function today(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function formatDate(iso){const[y,m,d]=iso.split('-');return d+'.'+m+'.'+y}
+function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
+function hoursNow(){return new Date().getHours()}
+function daysBetween(a,b){return Math.round((new Date(b)-new Date(a))/86400000)}
+function getSeason(){return Math.floor(new Date().getMonth()/3)+1}
+function getSeasonName(){return['ЗИМА','ВЕСНА','ЛЕТО','ОСЕНЬ'][(getSeason()-1)%4]}
+
+/* STATE */
+function defaultState(){return{version:12,name:'Кирилл',attrs:{str:{xp:0,rank:'E'},agi:{xp:0,rank:'E'},vit:{xp:0,rank:'E'},int:{xp:0,rank:'E'},per:{xp:0,rank:'E'},speech:{xp:0,rank:'E'},mem:{xp:0,rank:'E'},money:{xp:0,rank:'E'}},totalXP:0,completed:{},date:today(),streak:0,perfectDays:0,totalQuests:0,history:{},xpHistory:{},habits:[],habitHistory:{},journals:{},poemsDone:[],tongueDone:[],mnemoDone:[],courseDone:[],moneyLog:[],moneyStudyHours:0,moneyClients:0,moneyEarned:0,exams:{},sessionsToday:0,sessionsTotal:0,sessionDay:today(),theme:'cyan',accentColor:'',soundOn:true,vibrateOn:true,monarch:false,penaltyOn:true,cooldownOn:true,voiceOn:true,ttsOn:true,voiceFreq:'medium',will:{days:0,record:0,fails:0,saves:0,lastMark:null,triggers:[],log:[],rank:'E'},goals:JSON.parse(JSON.stringify(GOALS)),challenge:{date:'',challenge:null,accepted:false},legion:[],lastVoice:0,lastQuestTime:0,questsThisHour:0,quoteIndex:0}}
+let state=loadState();
+function loadState(){try{const raw=localStorage.getItem('systemV12');if(!raw){for(const k of['systemV11','systemV10']){const o=localStorage.getItem(k);if(o){const p=JSON.parse(o);const b=defaultState();return{...b,...p,version:12,attrs:{...b.attrs,...(p.attrs||{})},habits:p.habits||[],habitHistory:p.habitHistory||{},journals:p.journals||{},history:p.history||{},xpHistory:p.xpHistory||{},completed:{},moneyLog:p.moneyLog||[],poemsDone:p.poemsDone||[],tongueDone:p.tongueDone||[],mnemoDone:p.mnemoDone||[],courseDone:p.courseDone||[],exams:p.exams||{},will:{...b.will,...(p.will||{})},goals:p.goals||b.goals,legion:p.legion||[]}}}return defaultState()}const p=JSON.parse(raw);const b=defaultState();return{...b,...p,attrs:{...b.attrs,...(p.attrs||{})},habits:p.habits||[],habitHistory:p.habitHistory||{},journals:p.journals||{},history:p.history||{},xpHistory:p.xpHistory||{},completed:{},moneyLog:p.moneyLog||[],poemsDone:p.poemsDone||[],tongueDone:p.tongueDone||[],mnemoDone:p.mnemoDone||[],courseDone:p.courseDone||[],exams:p.exams||{},will:{...b.will,...(p.will||{})},goals:p.goals||b.goals,legion:p.legion||[]}}catch(e){return defaultState()}}
+function saveState(){try{localStorage.setItem('systemV12',JSON.stringify(state))}catch(e){}}
+function addLegion(text,value){state.legion.unshift({date:today(),text,value:value||''});if(state.legion.length>200)state.legion=state.legion.slice(0,200);saveState()}
+function checkNewDay(){if(state.date===today()){if(state.sessionDay!==today()){state.sessionsToday=0;state.sessionDay=today()}return}const yest=state.date;const pct=state.history[yest]||0;if(pct>=80)state.streak++;else if(state.streak>0){const old=state.streak;state.streak=0;if(state.penaltyOn)setTimeout(()=>{showPenalty('СЕРИЯ '+old+' ПРЕРВАНА');sfx.penalty()},2600)}state.completed={};state.date=today();state.sessionDay=today();state.sessionsToday=0;state.challenge={date:today(),challenge:null,accepted:false};saveState()}
+
+/* AUDIO */
+let audioCtx=null;
+function ensureAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){return null}}if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function beep(f,d,t='sine',v=.08){if(!state.soundOn)return;const c=ensureAudio();if(!c)return;const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.setValueAtTime(f,c.currentTime);g.gain.setValueAtTime(v,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+d);o.start();o.stop(c.currentTime+d)}
+const sfx={click:()=>beep(880,.06,'square',.04),complete:()=>{beep(660,.08,'sine',.1);setTimeout(()=>beep(990,.12,'sine',.1),70)},rankUp:()=>{beep(523,.2,'sine',.14);setTimeout(()=>beep(659,.2,'sine',.14),150);setTimeout(()=>beep(784,.2,'sine',.14),300);setTimeout(()=>beep(1046,.3,'sine',.16),450);setTimeout(()=>beep(1318,.5,'sine',.18),650)},penalty:()=>{beep(200,.4,'sawtooth',.15);setTimeout(()=>beep(150,.6,'sawtooth',.18),200)},reset:()=>{beep(500,.1,'sine',.08);setTimeout(()=>beep(300,.2,'sine',.08),100)},pomodoro:()=>{beep(880,.15,'sine',.12);setTimeout(()=>beep(1100,.2,'sine',.12),150);setTimeout(()=>beep(1320,.4,'sine',.15),350)},voice:()=>{beep(660,.15,'sine',.1);setTimeout(()=>beep(880,.25,'sine',.12),150);setTimeout(()=>beep(1320,.4,'sine',.14),400)},willUp:()=>{beep(330,.2,'sine',.14);setTimeout(()=>beep(440,.2,'sine',.14),150);setTimeout(()=>beep(660,.3,'sine',.15),300);setTimeout(()=>beep(880,.4,'sine',.16),500)}};
+
+/* TTS */
+function speak(text,lang='ru-RU'){if(!state.ttsOn||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=lang;u.rate=.9;u.pitch=.9;u.volume=.85;const voices=speechSynthesis.getVoices();const ru=voices.find(v=>v.lang.startsWith('ru'));if(ru)u.voice=ru;speechSynthesis.speak(u)}catch(e){}}
+
+/* BG */
+const bgCanvas=document.getElementById('bgCanvas'),bgCtx=bgCanvas.getContext('2d'),auraEl=document.getElementById('aura');
+let bgParts=[];
+function resizeBg(){bgCanvas.width=innerWidth;bgCanvas.height=innerHeight}
+resizeBg();addEventListener('resize',resizeBg);
+for(let i=0;i<70;i++)bgParts.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.6+.3});
+function accentRGB(){let c=state.accentColor||getComputedStyle(document.body).getPropertyValue('--accent').trim()||'#00e5ff';c=c.replace('#','');if(c.length===3)c=c[0]+c[0]+c[1]+c[1]+c[2]+c[2];return{r:parseInt(c.substring(0,2),16),g:parseInt(c.substring(2,4),16),b:parseInt(c.substring(4,6),16)}}
+function drawBg(){bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);const{r,g,b}=accentRGB();const speed=RANKS.indexOf(getOverallRank())*.15+.3;bgParts.forEach(p=>{p.x+=p.vx*speed;p.y+=p.vy*speed;if(p.x<0)p.x=bgCanvas.width;if(p.x>bgCanvas.width)p.x=0;if(p.y<0)p.y=bgCanvas.height;if(p.y>bgCanvas.height)p.y=0;bgCtx.fillStyle=`rgba(${r},${g},${b},${.4+speed*.3})`;bgCtx.shadowColor=`rgb(${r},${g},${b})`;bgCtx.shadowBlur=8;bgCtx.beginPath();bgCtx.arc(p.x,p.y,p.r*(1+speed*.3),0,Math.PI*2);bgCtx.fill()});requestAnimationFrame(drawBg)}
+drawBg();
+
+/* RANK */
+function getRankFromXP(xp){if(xp>=RANK_XP.S)return'S';if(xp>=RANK_XP.A)return'A';if(xp>=RANK_XP.B)return'B';if(xp>=RANK_XP.C)return'C';if(xp>=RANK_XP.D)return'D';return'E'}
+function getNextRank(r){const i=RANKS.indexOf(r);return i<5?RANKS[i+1]:null}
+function getRankProgress(xp){const c=getRankFromXP(xp);const n=getNextRank(c);if(!n)return{current:xp-RANK_XP.S,needed:0,pct:100,currentRank:'S',nextRank:null};const cb=RANK_XP[c],nb=RANK_XP[n];return{current:xp-cb,needed:nb-cb,pct:clamp(((xp-cb)/(nb-cb))*100,0,100),currentRank:c,nextRank:n}}
+function getOverallRank(){let s=0;for(const k of Object.keys(ATTRS))s+=RANKS.indexOf(state.attrs[k].rank);return RANKS[clamp(Math.round(s/8),0,5)]}
+function getOverallPct(){return RANK_PERCENT[getOverallRank()]}
+function addAttrXP(a,xp){if(!state.attrs[a])return;const at=state.attrs[a];const o=at.rank;at.xp+=xp;const n=getRankFromXP(at.xp);if(RANKS.indexOf(n)>RANKS.indexOf(o)){at.rank=n;triggerRankUp(a,n)}saveState()}
+
+/* WILL */
+function getWillRank(d){if(d>=90)return'S';if(d>=60)return'A';if(d>=30)return'B';if(d>=14)return'C';if(d>=7)return'D';return'E'}
+function getWillNext(r){const i=RANKS.indexOf(r);return i<5?RANKS[i+1]:null}
+function getWillProgress(d){const c=getWillRank(d);const n=getWillNext(c);if(!n)return{current:d-WILL_XP.S,needed:0,pct:100,currentRank:'S',nextRank:null};const cb=WILL_XP[c],nb=WILL_XP[n];return{current:d-cb,needed:nb-cb,pct:clamp(((d-cb)/(nb-cb))*100,0,100),currentRank:c,nextRank:n}}
+function checkWillRankUp(){const r=getWillRank(state.will.days);if(RANKS.indexOf(r)>RANKS.indexOf(state.will.rank)){state.will.rank=r;if(r==='S'){triggerMonarchCeremony()}else{sfx.willUp();showNotif('🔥 РАНГ ВОЛИ: '+r,'red');addLegion('Ранг воли: '+r,'🔥')}saveState()}}
+function triggerMonarchCeremony(){sfx.rankUp();spawnParticles(150,'#ff2d55');const rup=document.getElementById('rankup');document.getElementById('rankBigLetter').textContent='МОНАРХ';document.getElementById('rankBigLetter').style.fontSize='clamp(50px,10vw,120px)';document.getElementById('rankBigLetter').style.color='#ff2d55';document.getElementById('rankBigLetter').style.textShadow='0 0 50px #ff2d55,0 0 100px #ff2d55';document.getElementById('rankTitleText').textContent='◆ ВОЛЯ ◆';document.getElementById('rankSubText').textContent='Ты победил главного врага. Того, кто внутри.';rup.classList.add('show');speak('Монарх. Ты победил главного врага. Того, кто внутри.');setTimeout(()=>{rup.classList.remove('show');document.getElementById('rankBigLetter').style.fontSize=''},5000);addLegion('Достигнут ранг МОНАРХ в воздержании','👑')}
+
+/* XP MULT */
+function xpMultiplier(){let m=1;if(state.monarch)m*=2;const idx=RANKS.indexOf(getOverallRank());m*=(1+idx*.15);const wr=getWillRank(state.will.days);if(RANKS.indexOf(wr)>=2)m*=1.1;if(wr==='S')m*=1.15;return m}
+
+/* MODAL/NOTIF/VOICE */
+function showModal(title,body){document.getElementById('modalTitle').textContent=title;document.getElementById('modalBody').innerHTML=body;document.getElementById('modal').classList.add('show')}
+let notifTimer;
+function showNotif(text,type=''){const n=document.getElementById('notif');if(!n)return;n.textContent=text;n.className='notif '+type;n.classList.add('show');clearTimeout(notifTimer);notifTimer=setTimeout(()=>n.classList.remove('show'),2400)}
+let sysVoiceTimer=null;
+function sysVoice(data,doSpeak){const el=document.getElementById('sysVoice');if(!el)return;document.getElementById('svText').textContent=data.t;document.getElementById('svSub').textContent=data.s||'';el.classList.add('show');sfx.voice();if(state.vibrateOn&&navigator.vibrate)navigator.vibrate([60,40,60]);clearTimeout(sysVoiceTimer);sysVoiceTimer=setTimeout(()=>el.classList.remove('show'),5500);if(doSpeak!==false){speak(data.t+(data.s?'. '+data.s:''))}}
+function pickRandom(a){return a[Math.floor(Math.random()*a.length)]}
+function buildVoiceMessage(){const dp=DAY_PLANS[new Date().getDay()];const done=dp.quests.filter(q=>state.completed[q.id]).length;const pct=(done/dp.quests.length)*100;const h=hoursNow();const overall=getOverallRank();const weak=Object.keys(ATTRS).sort((a,b)=>state.attrs[a].xp-state.attrs[b].xp)[0];const strong=Object.keys(ATTRS).sort((a,b)=>state.attrs[b].xp-state.attrs[a].xp)[0];let cat='motivate';const wr=getWillRank(state.will.days);const daysSinceFail=state.will.lastMark?daysBetween(state.will.lastMark,today()):999;if(daysSinceFail<=2&&state.will.fails>0)cat='fail';else if(state.will.days>0&&Math.random()<.25)cat='will';else if(h>=19&&pct<50)cat='warning';else{const r=Math.random();if(r<.35)cat='motivate';else if(r<.6)cat='observe';else if(r<.85)cat='challenge';else cat='rank'}if(Math.random()<.5){const q=pickRandom(QUOTES);return{t:q.t,s:'— '+q.a}}const msg=pickRandom(SYS_VOICES[cat]);let t=msg.t.replace('{st}',state.streak).replace('{r}',overall).replace('{h}',h).replace('{pomo}',state.sessionsToday).replace('{wd}',state.will.days).replace('{strong}',ATTRS[strong].name).replace('{weak}',ATTRS[weak].name);return{t,s:msg.s}}
+function scheduleVoice(){if(!state.voiceOn)return;const freqs={low:120*60*1000,medium:60*60*1000,high:20*60*1000};const iv=freqs[state.voiceFreq]||freqs.medium;setTimeout(()=>{if(state.voiceOn)sysVoice(buildVoiceMessage());setInterval(()=>{if(!state.voiceOn)return;if(document.getElementById('rankup').classList.contains('show'))return;if(document.getElementById('penalty').classList.contains('show'))return;if(document.getElementById('modal').classList.contains('show'))return;sysVoice(buildVoiceMessage())},iv)},45000)}
+
+/* CHALLENGE/COOLDOWN */
+function getChallenge(){if(state.challenge.date===today()&&state.challenge.challenge)return state.challenge.challenge;const idx=new Date().getDate()%CHALLENGES.length;state.challenge={date:today(),challenge:CHALLENGES[idx],accepted:false};saveState();return state.challenge.challenge}
+function canTakeQuest(){if(!state.cooldownOn)return true;const now=Date.now();if(!state.lastQuestTime)return true;const lh=Math.floor(state.lastQuestTime/3600000);const ch=Math.floor(now/3600000);if(lh!==ch)return true;return(state.questsThisHour||0)<2}
+function trackQuestTaken(){const now=Date.now();if(!state.lastQuestTime||Math.floor(state.lastQuestTime/3600000)!==Math.floor(now/3600000)){state.lastQuestTime=now;state.questsThisHour=0}state.questsThisHour=(state.questsThisHour||0)+1}
+
+/* RENDER */
+function render(){
+    document.getElementById('tbRank').textContent=getOverallRank();
+    document.getElementById('tbRank').style.color=RANK_COLORS[getOverallRank()];
+    document.getElementById('tbStreak').textContent=state.streak;
+    document.getElementById('tbXP').textContent=state.totalXP;
+    document.getElementById('pName').textContent=state.name;
+    document.getElementById('willBadge').textContent=state.will.days;
+    const overall=getOverallRank();
+    document.getElementById('overallRank').textContent=overall;
+    document.getElementById('overallRank').style.color=RANK_COLORS[overall];
+    document.getElementById('overallPct').textContent=getOverallPct();
+    const titles={E:'ПРОБУЖДЁННЫЙ',D:'ОХОТНИК',C:'ЭЛИТА',B:'ЛОРД',A:'ИМПЕРАТОР',S:'МОНАРХ ТЕНИ'};
+    document.getElementById('pTitle').textContent=titles[overall];
+    document.getElementById('pRankLine').textContent='РАНГ: '+overall+' · '+RANK_PERCENT[overall].toUpperCase();
+    document.getElementById('messageOfDay').textContent=pickRandom(QUOTES).t;
+    const auraIdx=RANKS.indexOf(overall);
+    auraEl.style.opacity=(auraIdx*.12);
+    auraEl.style.background=`radial-gradient(circle at 50% 50%, ${RANK_COLORS[overall]}22, transparent 60%)`;
+    const dp=DAY_PLANS[new Date().getDay()];
+    const done=dp.quests.filter(q=>state.completed[q.id]).length;
+    const pct=dp.quests.length?(done/dp.quests.length)*100:0;
+    document.getElementById('xpFill').style.width=pct+'%';
+    document.getElementById('xpText').textContent=state.totalXP;
+    document.getElementById('motivText').textContent=pickRandom(QUOTES).t;
+    renderAttrs();renderSeason();
+    renderQuests();renderChallenge();
+    renderWill();
+    renderProgress();
+    renderQuotes();
+    renderWeek();renderHabits();
+    renderPoems();renderTongue();renderMnemo();
+    renderMoney();renderMoneyCourse();
+    renderGoals();
+    renderExams();renderLegion();
+    renderJournalList();renderTimerStats();renderMusicUI();updateNavBadge();
+    document.getElementById('monarchBtn').textContent=state.monarch?'ВКЛ':'ВЫКЛ';
+    document.getElementById('penaltyBtn').textContent=state.penaltyOn?'ВКЛ':'ВЫКЛ';
+    document.getElementById('cooldownBtn').textContent=state.cooldownOn?'ВКЛ':'ВЫКЛ';
+    document.getElementById('soundToggleBtn').textContent=state.soundOn?'ВКЛ':'ВЫКЛ';
+    document.getElementById('vibrateBtn').textContent=state.vibrateOn?'ВКЛ':'ВЫКЛ';
+    document.getElementById('voiceBtn').textContent=state.voiceOn?'ВКЛ':'ВЫКЛ';
+    document.getElementById('ttsBtn').textContent=state.ttsOn?'ВКЛ':'ВЫКЛ';
+    document.getElementById('voiceFreqSelect').value=state.voiceFreq||'medium';
+    document.getElementById('themeSelect').value=state.theme;
+    document.getElementById('nameInput').value=state.name;
+    applyTheme();
+}
+function renderAttrs(){const g=document.getElementById('attrGrid');if(!g)return;g.innerHTML='';for(const key of Object.keys(ATTRS)){const m=ATTRS[key];const d=state.attrs[key];const p=getRankProgress(d.xp);const c=RANK_COLORS[p.currentRank];const mean=ATTR_MEANING[key][p.currentRank];const b=document.createElement('div');b.className='attr-block';b.innerHTML=`<div class="attr-head"><div class="attr-name">${m.icon} ${m.name}</div><div class="attr-rank-badge" style="color:${c};">${p.currentRank}</div></div><div class="attr-progress"><div style="width:${p.pct}%;background:${c};color:${c};"></div></div><div class="attr-meta"><span>${p.current} / ${p.needed||'—'} XP</span><span>${p.nextRank?'ДО '+p.nextRank:'МАКС'}</span></div><div class="attr-world">${mean}</div>`;g.appendChild(b)}}
+function renderSeason(){const el=document.getElementById('seasonBlock');if(!el)return;const s=getSeason();const name=getSeasonName();const wk=Math.ceil(new Date().getDate()/7);el.innerHTML=`<div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span style="font-family:'Orbitron';font-size:14px;color:var(--gold);letter-spacing:3px;">СЕЗОН ${s} · ${name}</span><span style="font-family:'Orbitron';font-size:11px;color:var(--soft);">НЕДЕЛЯ ${wk}/13</span></div><div style="font-size:12px;color:#c0c0c0;line-height:1.7;">Квестов: <b style="color:var(--accent)">${state.totalQuests}</b><br>Идеальных: <b style="color:var(--green)">${state.perfectDays}</b><br>Ранг: <b style="color:${RANK_COLORS[getOverallRank()]}">${getOverallRank()}</b></div>`}
+function renderQuests(){const list=document.getElementById('questList');if(!list)return;list.innerHTML='';const dp=DAY_PLANS[new Date().getDay()];document.getElementById('dayHeader').innerHTML=`<b>${dp.name}</b> · ${dp.focus}`;let done=0;dp.quests.forEach(q=>{const isDone=!!state.completed[q.id];if(isDone)done++;const xp=Math.round(q.xp*xpMultiplier());const el=document.createElement('div');el.className='quest'+(isDone?' done':'');el.innerHTML=`${q.attrs.map(a=>`<span class="attr-tag ${a}">${ATTRS[a].icon}</span>`).join('')}<div class="check">${isDone?'✔':''}</div><span class="qt">${q.text}</span><span class="qx">+${xp} XP</span><span class="qs">${isDone?'ГОТОВО':'ОЖИДАНИЕ'}</span>`;if(!isDone)el.onclick=()=>completeQuest(q);list.appendChild(el)});const pct=dp.quests.length?Math.round((done/dp.quests.length)*100):0;document.getElementById('qCount').textContent=done+'/'+dp.quests.length;document.getElementById('qPct').textContent=pct+'%';document.getElementById('qpFill').style.width=pct+'%';state.history[state.date]=pct;saveState()}
+function renderChallenge(){const el=document.getElementById('challengeBlock');if(!el)return;const ch=getChallenge();if(state.challenge.accepted===true){el.innerHTML='<div class="card" style="border-color:var(--green);text-align:center;"><div style="font-family:\'Orbitron\';font-size:12px;color:var(--green);letter-spacing:2px;">✔ ВЫЗОВ ПРИНЯТ</div></div>';return}el.innerHTML=`<div class="card" style="border-color:var(--gold);background:rgba(255,204,0,.06);"><div style="font-family:'Orbitron';font-size:11px;color:var(--gold);letter-spacing:2px;margin-bottom:8px;">⚡ ВЫЗОВ ДНЯ</div><div style="font-size:13px;color:#e6e6e6;margin-bottom:10px;">${ch.t}</div><div style="display:flex;gap:8px;"><button class="btn sm green" id="chA">ПРИНЯТЬ (+${ch.xp})</button><button class="btn sm danger" id="chD">-10 XP</button></div></div>`;document.getElementById('chA').onclick=()=>{state.challenge.accepted=true;const xp=Math.round(ch.xp*xpMultiplier());state.totalXP+=xp;addAttrXP('per',Math.round(xp/2));addAttrXP('vit',Math.round(xp/2));sfx.complete();showNotif('+'+xp+' XP · ВЫЗОВ','gold');speak('Вызов принят. Уровень силы растёт.');addLegion('Принял вызов дня','⚡');saveState();render()};document.getElementById('chD').onclick=()=>{state.totalXP=Math.max(0,state.totalXP-10);state.challenge.accepted=true;showNotif('-10 XP','red');saveState();render()}}
+function renderWill(){document.getElementById('willDays').textContent=state.will.days;document.getElementById('willRecord').textContent=state.will.record;document.getElementById('willSaves').textContent=state.will.saves;document.getElementById('willFails').textContent=state.will.fails;const p=getWillProgress(state.will.days);const c=RANK_COLORS[p.currentRank];const l=document.getElementById('willRankLetter');l.textContent=p.currentRank;l.style.color=c;document.getElementById('willRankFill').style.width=p.pct+'%';document.getElementById('willRankInfo').textContent=p.current+' / '+(p.needed||'—');document.getElementById('willRankNext').textContent=p.nextRank?'ДО '+p.nextRank:'МАКС';const q=pickRandom(state.will.days>0&&Math.random()<.5?WILL_QUOTES_A:WILL_QUOTES_A);document.getElementById('willQuote').textContent=q;const tl=document.getElementById('triggerList');tl.innerHTML='';if(state.will.triggers.length===0){tl.innerHTML='<div style="text-align:center;padding:12px;color:var(--soft);font-size:12px;font-style:italic;">Пока нет записей.</div>'}else state.will.triggers.slice().reverse().slice(0,15).forEach(t=>{tl.innerHTML+=`<div class="will-trigger-log"><span>${t.text}</span><b>${t.date}</b></div>`});const ll=document.getElementById('logList');ll.innerHTML='';if(state.will.log.length===0){ll.innerHTML='<div style="text-align:center;padding:12px;color:var(--soft);font-size:12px;font-style:italic;">Раз в неделю — отмечай пользу.</div>'}else state.will.log.slice().reverse().slice(0,8).forEach(l=>{ll.innerHTML+=`<div style="padding:8px 12px;background:rgba(0,255,136,.04);border-left:2px solid var(--green);border-radius:4px;margin-bottom:5px;font-size:11px;display:flex;justify-content:space-between;"><span style="color:var(--soft);font-family:'Orbitron';font-size:9px;">${l.date}</span><span>🎯${l.focus} ⚡${l.energy} 💪${l.power}</span></div>`})}
+function renderWeek(){const g=document.getElementById('weekGrid');if(!g)return;g.innerHTML='';const td=new Date().getDay();const order=[1,2,3,4,5,6,0];const names=['ВС','ПН','ВТ','СР','ЧТ','ПТ','СБ'];order.forEach(d=>{const p=DAY_PLANS[d];const el=document.createElement('div');el.className='week-day'+(d===td?' today':'')+((d===0||d===6)?' weekend':'');el.innerHTML=`<div class="wd-name">${names[d]}</div><div class="wd-icon">${p.icon}</div><div class="wd-focus">${p.focus}</div>`;g.appendChild(el)})}
+function renderHabits(){const list=document.getElementById('habitList');if(!list)return;list.innerHTML='';const t=today();if(state.habits.length===0){list.innerHTML='<div style="text-align:center;padding:16px;color:var(--soft);font-style:italic;font-size:12px;">Пока нет привычек.</div>';return}state.habits.forEach(h=>{const done=state.habitHistory[t]&&state.habitHistory[t][h.id];const el=document.createElement('div');el.className='habit-row'+(done?' done':'');const chain=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const on=state.habitHistory[k]&&state.habitHistory[k][h.id];chain.push(`<div class="c ${on?'on':''}"></div>`)}el.innerHTML=`<div class="habit-check ${done?'done':''}" data-id="${h.id}">${done?'✔':''}</div><div class="habit-info"><div class="habit-name">${h.name}</div><div class="habit-chain">${chain.join('')}</div></div><button class="habit-del" data-del="${h.id}">✕</button>`;list.appendChild(el)});list.querySelectorAll('.habit-check').forEach(el=>{el.onclick=()=>{const id=el.dataset.id;const t=today();if(!state.habitHistory[t])state.habitHistory[t]={};state.habitHistory[t][id]=!state.habitHistory[t][id];beep(880,.08,'sine',.08);saveState();render()}});list.querySelectorAll('.habit-del').forEach(el=>{el.onclick=()=>{if(!confirm('Удалить?'))return;state.habits=state.habits.filter(h=>h.id!==el.dataset.del);saveState();render()}})}
+function renderPoems(){const list=document.getElementById('poemsList');if(!list)return;list.innerHTML='';POEMS.forEach(p=>{const done=state.poemsDone.includes(p.id);const el=document.createElement('div');el.className='poem-card'+(done?' done':'');el.innerHTML=`<div class="poem-name">${done?'✔ ':''}${p.name}</div><div class="poem-author">${p.author} · ${p.lines} строк</div>`;el.onclick=()=>{if(done)return;state.poemsDone.push(p.id);const xp=50;state.totalXP+=xp;addAttrXP('mem',Math.round(xp*.6));addAttrXP('speech',Math.round(xp*.4));sfx.rankUp();showNotif('🎭 СТИХ · +'+xp+' XP','purple');addLegion('Выучил стих: '+p.name,'🎭');saveState();render()};list.appendChild(el)})}
+function renderTongue(){const list=document.getElementById('tongueList');if(!list)return;list.innerHTML='';TONGUE.forEach(t=>{const done=state.tongueDone.includes(t.id);const el=document.createElement('div');el.className='tongue-card'+(done?' done':'');el.innerHTML=`<div class="tongue-name">${done?'✔ ':''}${t.name}</div><div class="tongue-desc">${t.desc}</div>`;el.onclick=()=>{if(done)return;state.tongueDone.push(t.id);const xp=30;state.totalXP+=xp;addAttrXP('speech',xp);sfx.complete();showNotif('🗣 +'+xp+' XP','purple');saveState();render()};list.appendChild(el)})}
+function renderMnemo(){const list=document.getElementById('mnemoList');if(!list)return;list.innerHTML='';MNEMO.forEach(m=>{const done=state.mnemoDone.includes(m.id);const el=document.createElement('div');el.className='skill-card'+(done?' done':'');el.innerHTML=`<div class="skill-name">${done?'✔ ':''}${m.name}</div><div class="skill-desc">${m.desc}</div>`;el.onclick=()=>{if(done)return;state.mnemoDone.push(m.id);const xp=40;state.totalXP+=xp;addAttrXP('mem',xp);sfx.complete();showNotif('🎭 +'+xp+' XP','purple');saveState();render()};list.appendChild(el)})}
+function renderMoney(){document.getElementById('moneyStudyHours').textContent=Math.round(state.moneyStudyHours*10)/10;document.getElementById('moneyClients').textContent=state.moneyClients;document.getElementById('moneyEarned').textContent='$'+state.moneyEarned;const list=document.getElementById('moneyLogList');if(!list)return;list.innerHTML='';if(state.moneyLog.length===0){list.innerHTML='<div style="text-align:center;padding:14px;color:var(--soft);font-size:12px;font-style:italic;">Лог пуст.</div>';return}state.moneyLog.slice().reverse().slice(0,20).forEach(e=>{list.innerHTML+=`<div class="journal-entry"><b>${e.date}</b>${e.text} <span style="color:var(--gold);float:right;">+${e.xp} XP</span></div>`})}
+function renderMoneyCourse(){const list=document.getElementById('moneyCourseList');if(!list)return;list.innerHTML='';MONEY_COURSE.forEach(c=>{const done=state.courseDone.includes(c.id);const el=document.createElement('div');el.className='course-card'+(done?' done':'');el.innerHTML=`<div class="course-name">${done?'✔ ':''}${c.name}</div>`;el.onclick=()=>{if(done)return;state.courseDone.push(c.id);const xp=30;state.totalXP+=xp;addAttrXP('money',xp);sfx.complete();showNotif('📚 +'+xp+' XP','gold');saveState();render()};list.appendChild(el)})}
+function renderGoals(){const list=document.getElementById('goalsList');if(!list)return;list.innerHTML='';state.goals.forEach(g=>{const pct=clamp(((g.current-g.start)/(g.target-g.start))*100,0,100);list.innerHTML+=`<div class="goal-row"><div class="goal-head"><span class="goal-title">${g.name}</span><span class="goal-value">${g.current} / ${g.target} ${g.unit}</span></div><div class="goal-track"><div class="goal-fill" style="width:${pct}%"></div></div><div class="goal-meta"><span>СТАРТ: ${g.start}</span><span>ЦЕЛЬ: ${g.target}</span><span>${Math.round(pct)}%</span></div></div>`})}
+function renderExams(){const list=document.getElementById('examsList');if(!list)return;list.innerHTML='';const now=Date.now();EXAMS.forEach(exam=>{const last=state.exams[exam.id];const lastDate=last?new Date(last.date).getTime():0;const dueDate=lastDate+(exam.months*30*24*3600*1000);const daysLeft=lastDate?Math.round((dueDate-now)/(24*3600*1000)):0;const due=!last||daysLeft<=7;const block=document.createElement('div');block.className='exam-block'+(due?' due':'');const at=state.attrs[exam.attr];const meta=ATTRS[exam.attr];const st=!last?'НЕ СДАВАЛСЯ':daysLeft<=0?'ПРОСРОЧЕН':daysLeft<=7?`ОСТАЛОСЬ ${daysLeft} ДНЕЙ`:`ДО ЭКЗАМЕНА ${daysLeft} ДНЕЙ`;const sc=!last?'warn':daysLeft<=0?'bad':daysLeft<=7?'warn':'good';block.innerHTML=`<div class="exam-head"><div class="exam-title">${meta.icon} ${exam.name}</div><div class="exam-rank" style="color:${RANK_COLORS[at.rank]};">РАНГ ${at.rank}</div></div><div class="exam-desc">${exam.desc}</div><div class="exam-status ${sc}">${st}</div><div class="exam-actions"><button class="btn sm green" data-exam="${exam.id}">ПРОЙТИ</button></div>`;list.appendChild(block)});list.querySelectorAll('[data-exam]').forEach(b=>{b.onclick=()=>{const eid=b.dataset.exam;const ex=EXAMS.find(e=>e.id===eid);const r=prompt(`ЭКЗАМЕН: ${ex.name}\n\n${ex.desc}\n\nРезультат или "подтверждаю":`);if(!r)return;state.exams[eid]={date:today(),result:r};sfx.rankUp();showNotif('🏅 '+ex.name,'gold');state.totalXP+=100;addAttrXP(ex.attr,100);addLegion('Пройден экзамен: '+ex.name,'🏅');saveState();render()}})}
+function renderLegion(){const list=document.getElementById('legionList');if(!list)return;list.innerHTML='';if(state.legion.length===0){list.innerHTML='<div style="text-align:center;padding:20px;color:var(--soft);font-style:italic;">Летопись пуста.</div>';return}state.legion.slice(0,100).forEach(l=>{list.innerHTML+=`<div class="legion-item"><span><b>${formatDate(l.date)}</b>${l.text}</span><span class="v">${l.value}</span></div>`})}
+function renderJournalList(){const list=document.getElementById('journalList');if(!list)return;list.innerHTML='';const keys=Object.keys(state.journals).filter(k=>(state.journals[k]||'').trim()).sort().reverse().slice(0,10);if(keys.length===0){list.innerHTML='<div style="font-size:12px;color:var(--soft);text-align:center;padding:14px;font-style:italic;">Нет записей.</div>';return}keys.forEach(k=>{const el=document.createElement('div');el.className='journal-entry';const txt=state.journals[k]||'';el.innerHTML=`<b>${formatDate(k)}</b>${txt.slice(0,100)}${txt.length>100?'...':''}`;el.onclick=()=>{document.getElementById('journalText').value=txt;document.getElementById('journalChars').textContent=txt.length+' символов';showNotif('ЗАГРУЖЕНО '+formatDate(k))};list.appendChild(el)})}
+function renderTimerStats(){document.getElementById('sessToday').textContent=state.sessionsToday;document.getElementById('sessTotal').textContent=state.sessionsTotal;const xp=Math.round(15*xpMultiplier());document.getElementById('sessXP').textContent='+'+xp}
+function renderMusicUI(){const grid=document.getElementById('tracksGrid');if(!grid)return;grid.innerHTML='';for(const[id,t]of Object.entries(TRACKS)){const el=document.createElement('div');el.className='track'+(music.current===id?' playing':'');el.innerHTML=`<span class="track-icon">${t.icon}</span><div style="flex:1;"><div class="track-name">${t.name}</div><div class="track-desc">${t.desc}</div></div>`;el.onclick=()=>{if(music.current===id&&music.playing)music.stop();else music.play(id);renderMusicUI()};grid.appendChild(el)}const np=document.getElementById('nowPlaying'),pb=document.getElementById('musicPlayBtn');if(music.current&&music.playing){np.textContent=TRACKS[music.current].name;pb.textContent='⏸'}else if(music.current){np.textContent=TRACKS[music.current].name+' (пауза)';pb.textContent='▶'}else{np.textContent='НЕ ВОСПРОИЗВОДИТСЯ';pb.textContent='▶'}}
+setInterval(()=>{const bars=document.querySelectorAll('#musicVisual .bar');if(!music.playing){bars.forEach(b=>b.style.height='20%');return}bars.forEach(b=>{b.style.height=(20+Math.random()*70)+'%'})},180);
+function updateNavBadge(){const dp=DAY_PLANS[new Date().getDay()];const done=dp.quests.filter(q=>state.completed[q.id]).length;const b=document.getElementById('navBadge');if(b)b.style.display=done<dp.quests.length?'inline-block':'none'}
+function applyTheme(){document.body.classList.remove('theme-red','theme-gold','theme-purple');if(state.theme==='red')document.body.classList.add('theme-red');else if(state.theme==='gold')document.body.classList.add('theme-gold');else if(state.theme==='purple')document.body.classList.add('theme-purple');const tc={cyan:'#00e5ff',red:'#ff2d55',gold:'#ffcc00',purple:'#b16bff'};let color=tc[state.theme]||'#00e5ff';if(state.accentColor)color=state.accentColor;const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.setAttribute('content',color);if(state.accentColor){document.documentElement.style.setProperty('--accent',state.accentColor);document.documentElement.style.setProperty('--glow',state.accentColor+'88');document.documentElement.style.setProperty('--border',state.accentColor+'40')}else{document.documentElement.style.removeProperty('--accent');document.documentElement.style.removeProperty('--glow');document.documentElement.style.removeProperty('--border')}}
+
+/* ЦИТАТЫ */
+function renderQuotes(){
+    if(state.quoteIndex>=QUOTES.length||state.quoteIndex<0)state.quoteIndex=0;
+    const q=QUOTES[state.quoteIndex];
+    document.getElementById('currentQuoteText').textContent=q.t;
+    document.getElementById('currentQuoteAuthor').textContent='— '+q.a;
+    const list=document.getElementById('quotesList');if(!list)return;
+    list.innerHTML='';
+    QUOTES.forEach((q,i)=>{const el=document.createElement('div');el.className='quote-list-item';el.innerHTML=`<div class="quote-list-text">"${q.t}"</div><div class="quote-list-author">— ${q.a}</div>`;el.onclick=()=>{state.quoteIndex=i;saveState();renderQuotes();speak(q.t)};list.appendChild(el)});
+}
+
+/* ПРОГРЕСС */
+let progressRange=30;
+function renderProgress(){renderStatCards();renderMainChart();renderAttrsChart();renderHeatmapYear();renderRankTimeline();renderWeekCompare()}
+function renderStatCards(){const el=document.getElementById('statCards');if(!el)return;let totalDays=0,totalXP=0;const keys=Object.keys(state.xpHistory||{});keys.forEach(k=>{let d=0;Object.values(state.xpHistory[k]).forEach(v=>d+=v);totalXP+=d;totalDays++});const avgXP=totalDays?Math.round(totalXP/totalDays):0;let bestDay={xp:0,date:'—'};keys.forEach(k=>{let d=0;Object.values(state.xpHistory[k]).forEach(v=>d+=v);if(d>bestDay.xp)bestDay={xp:d,date:k}});let weekQ=0;for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const pct=state.history[k]||0;weekQ+=Math.round((pct/100)*7)}el.innerHTML=`<div class="stat-card"><div class="sc-icon">⚡</div><div class="sc-value">${avgXP}</div><div class="sc-label">СРЕДНИЙ XP/ДЕНЬ</div></div><div class="stat-card gold"><div class="sc-icon">🏆</div><div class="sc-value">${bestDay.xp}</div><div class="sc-label">ЛУЧШИЙ ДЕНЬ</div></div><div class="stat-card green"><div class="sc-icon">⚔</div><div class="sc-value">${weekQ}</div><div class="sc-label">КВЕСТОВ 7 ДНЕЙ</div></div><div class="stat-card red"><div class="sc-icon">🔥</div><div class="sc-value">${state.streak}</div><div class="sc-label">СЕРИЯ</div></div>`}
+function renderMainChart(){const svg=document.getElementById('progressMainChart');if(!svg)return;const days=progressRange;const data=[];for(let i=days-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');let xp=0;if(state.xpHistory&&state.xpHistory[k])Object.values(state.xpHistory[k]).forEach(v=>xp+=v);data.push({date:k,xp,pct:state.history[k]||0})}const maxXP=Math.max(50,...data.map(d=>d.xp));const w=800,h=280,padL=40,padR=20,padT=20,padB=40;const cW=w-padL-padR,cH=h-padT-padB;let grid='';for(let i=0;i<=4;i++){const y=padT+(i/4)*cH;const val=Math.round(maxXP*(1-i/4));grid+=`<line class="grid-line" x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}"/><text class="axis-text" x="${padL-8}" y="${y+3}" text-anchor="end">${val}</text>`}let xL='';const lStep=Math.max(1,Math.floor(data.length/6));data.forEach((d,i)=>{if(i%lStep===0||i===data.length-1){const x=padL+(i/(data.length-1))*cW;const[_,m,day]=d.date.split('-');xL+=`<text class="axis-text" x="${x}" y="${h-15}" text-anchor="middle">${day}.${m}</text>`}});let path='';const pts=[];data.forEach((d,i)=>{const x=padL+(i/(data.length-1))*cW;const y=padT+cH-(d.xp/maxXP)*cH;path+=(i===0?'M':'L')+x+','+y+' ';pts.push({x,y,d})});const area=path+`L ${padL+cW},${padT+cH} L ${padL},${padT+cH} Z`;let points='';pts.forEach((p,i)=>{if(i%Math.max(1,Math.floor(data.length/20))===0||i===pts.length-1){points+=`<circle class="chart-point" cx="${p.x}" cy="${p.y}" data-date="${p.d.date}" data-xp="${p.d.xp}" data-pct="${p.d.pct}"/>`}});svg.innerHTML=`<defs><linearGradient id="mG" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="var(--accent)" stop-opacity="0.5"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>${grid}${xL}<path class="chart-area" d="${area}" fill="url(#mG)"/><path class="chart-line" d="${path}" stroke="var(--accent)" style="filter:drop-shadow(0 0 6px var(--accent))"/>${points}`;const totalXP=data.reduce((a,b)=>a+b.xp,0);const avg=Math.round(totalXP/data.length);const maxD=data.reduce((a,b)=>a.xp>b.xp?a:b,data[0]);const actDays=data.filter(d=>d.xp>0).length;document.getElementById('chartStats').innerHTML=`<div class="cs-item"><div class="cs-val">${totalXP}</div><div class="cs-lbl">ВСЕГО XP</div></div><div class="cs-item"><div class="cs-val">${avg}</div><div class="cs-lbl">СРЕДНЕЕ/ДЕНЬ</div></div><div class="cs-item"><div class="cs-val">${maxD.xp}</div><div class="cs-lbl">ПИК</div></div><div class="cs-item"><div class="cs-val">${actDays}</div><div class="cs-lbl">АКТИВНЫХ ДНЕЙ</div></div>`;const tt=document.getElementById('chartTooltip');svg.querySelectorAll('.chart-point').forEach(pt=>{pt.addEventListener('mouseenter',()=>{const r=svg.getBoundingClientRect();const x=(parseFloat(pt.getAttribute('cx'))/800)*r.width;const y=(parseFloat(pt.getAttribute('cy'))/280)*r.height;tt.style.left=x+'px';tt.style.top=y+'px';tt.innerHTML=`<div style="color:var(--accent);font-weight:900">${pt.dataset.xp} XP</div><div style="font-size:9px;color:var(--soft);margin-top:3px">${formatDate(pt.dataset.date)} · ${pt.dataset.pct}%</div>`;tt.classList.add('show')});pt.addEventListener('mouseleave',()=>tt.classList.remove('show'))})}
+function renderAttrsChart(){const svg=document.getElementById('progressAttrsChart');if(!svg)return;const legend=document.getElementById('attrsLegend');if(!legend)return;const days=30;const keys=Object.keys(ATTRS);const series={};keys.forEach(k=>series[k]=[]);const allDays=[];for(let i=days-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');allDays.push(k)}keys.forEach(attr=>{let cum=0;allDays.forEach(day=>{if(state.xpHistory&&state.xpHistory[day]&&state.xpHistory[day][attr])cum+=state.xpHistory[day][attr];series[attr].push(cum)})});let maxV=50;keys.forEach(k=>series[k].forEach(v=>{if(v>maxV)maxV=v}));const w=800,h=320,padL=40,padR=20,padT=20,padB=30;const cW=w-padL-padR,cH=h-padT-padB;let grid='';for(let i=0;i<=4;i++){const y=padT+(i/4)*cH;const val=Math.round(maxV*(1-i/4));grid+=`<line class="grid-line" x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}"/><text class="axis-text" x="${padL-8}" y="${y+3}" text-anchor="end">${val}</text>`}let paths='';keys.forEach(attr=>{const color=ATTRS[attr].color;let p='';series[attr].forEach((v,i)=>{const x=padL+(i/(series[attr].length-1))*cW;const y=padT+cH-(v/maxV)*cH;p+=(i===0?'M':'L')+x+','+y+' '});paths+=`<path class="chart-line" d="${p}" stroke="${color}" style="filter:drop-shadow(0 0 4px ${color})" opacity="0.85"/>`});svg.innerHTML=`${grid}${paths}`;legend.innerHTML=keys.map(k=>`<span><span class="dot" style="background:${ATTRS[k].color}"></span>${ATTRS[k].icon}</span>`).join('')}
+function renderHeatmapYear(){const el=document.getElementById('heatmapYear');if(!el)return;el.innerHTML='';const totalDays=365;const start=new Date();start.setDate(start.getDate()-totalDays+1);while(start.getDay()!==1)start.setDate(start.getDate()-1);for(let i=0;i<totalDays+7;i++){const d=new Date(start);d.setDate(d.getDate()+i);if(d>new Date()){const e=document.createElement('div');e.className='hm-year-cell';e.style.opacity='0';el.appendChild(e);continue}const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');const pct=state.history[k]||0;let lvl=0;if(pct>=100)lvl=4;else if(pct>=75)lvl=3;else if(pct>=40)lvl=2;else if(pct>0)lvl=1;const c=document.createElement('div');c.className='hm-year-cell';c.setAttribute('data-lvl',lvl);c.title=`${formatDate(k)}: ${pct}%`;el.appendChild(c)}}
+function renderRankTimeline(){const el=document.getElementById('rankTimeline');if(!el)return;el.innerHTML='';const events=(state.legion||[]).filter(l=>l.text.includes('ранга')||l.text.includes('Ранг'));if(events.length===0){el.innerHTML='<div style="text-align:center;padding:16px;color:var(--soft);font-style:italic;font-size:12px;">Пока нет ранг-апов.</div>';return}events.slice(0,15).forEach(ev=>{const m=ev.text.match(/ранга ([A-Z])/)||ev.text.match(/ранг[а]? ([A-Z])/);const rank=m?m[1]:'?';const color=RANK_COLORS[rank]||'var(--accent)';el.innerHTML+=`<div class="timeline-item"><div class="timeline-dot" style="color:${color}">${rank}</div><div class="timeline-info"><div class="timeline-title">${ev.text}</div></div><div class="timeline-date">${formatDate(ev.date)}</div></div>`})}
+function renderWeekCompare(){const el=document.getElementById('weekCompare');if(!el)return;el.innerHTML='';const thisW=[],lastW=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');thisW.push(state.history[k]||0)}for(let i=7;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');lastW.push(state.history[k]||0)}const sum=a=>a.reduce((x,y)=>x+y,0);const avg=a=>Math.round(sum(a)/a.length);const tA=avg(thisW),lA=avg(lastW);const diff=tA-lA;const cmp=(t,l,label)=>{const d=t-l;const cls=d>0?'up':d<0?'down':'same';const a=d>0?'▲':d<0?'▼':'=';return `<div class="wc-row"><div class="wc-left">${l}</div><div class="wc-label">${label}</div><div class="wc-right ${cls}">${t}<span style="font-size:10px;margin-left:6px;">${a}</span></div></div>`};el.innerHTML=`${cmp(tA,lA,'СРЕДНЕЕ %')}${cmp(sum(thisW),sum(lastW),'ВСЕГО %')}<div class="wc-row" style="padding-top:14px;border-top:1px solid rgba(0,229,255,.15);"><div class="wc-left">${lastW.filter(v=>v>0).length}</div><div class="wc-label">АКТИВНЫХ</div><div class="wc-right ${thisW.filter(v=>v>0).length>=lastW.filter(v=>v>0).length?'up':'down'}">${thisW.filter(v=>v>0).length}</div></div><div style="text-align:center;padding:16px 0 4px;font-family:'Orbitron';font-size:11px;letter-spacing:2px;color:${diff>0?'var(--green)':diff<0?'var(--red)':'var(--soft)'};">${diff>0?'▲ РОСТ '+diff+'%':diff<0?'▼ ПАДЕНИЕ '+Math.abs(diff)+'%':'= БЕЗ ИЗМЕНЕНИЙ'}</div>`}
+
+/* ACTIONS */
+function completeQuest(q){if(state.completed[q.id])return;if(!canTakeQuest()){showNotif('⏱ КУЛДАУН','red');return}state.completed[q.id]=true;const xp=Math.round(q.xp*xpMultiplier());state.totalXP+=xp;state.totalQuests++;if(!state.xpHistory[state.date])state.xpHistory[state.date]={};const per=Math.round(xp/q.attrs.length);q.attrs.forEach(a=>{addAttrXP(a,per);state.xpHistory[state.date][a]=(state.xpHistory[state.date][a]||0)+per});trackQuestTaken();sfx.complete();showNotif('+'+xp+' XP · '+q.text,'green');flyXP(xp);if(Math.random()<.15){const quote=pickRandom(QUOTES);sysVoice({t:quote.t,s:'— '+quote.a})}const dp=DAY_PLANS[new Date().getDay()];if(dp.quests.every(x=>state.completed[x.id])){state.perfectDays++;setTimeout(()=>{sfx.rankUp();showNotif('🏆 ИДЕАЛЬНЫЙ ДЕНЬ','gold');addLegion('Идеальный день!','🏆');speak('Идеальный день. Ты доказал свою силу.')},800)}saveState();render()}
+function flyXP(xp){const el=document.createElement('div');el.className='fly-xp';el.textContent='+'+xp+' XP';el.style.left=(30+Math.random()*40)+'%';el.style.top=(30+Math.random()*20)+'%';document.body.appendChild(el);el.animate([{transform:'translateY(0) scale(1)',opacity:1},{transform:'translateY(-200px) scale(1.5)',opacity:0}],{duration:1500,easing:'cubic-bezier(.2,.9,.3,1.2)'});setTimeout(()=>el.remove(),1600)}
+function triggerRankUp(attr,newRank){sfx.rankUp();const main=document.querySelector('.main');if(main){main.classList.add('shake');setTimeout(()=>main.classList.remove('shake'),600)}const color=RANK_COLORS[newRank];const rup=document.getElementById('rankup');document.getElementById('rankBigLetter').textContent=newRank;document.getElementById('rankBigLetter').style.color=color;document.getElementById('rankBigLetter').style.textShadow=`0 0 45px ${color},0 0 100px ${color},0 0 180px ${color}`;document.getElementById('rankTitleText').textContent='РАНГ '+ATTRS[attr].name;const subs={E:'Начало.',D:'Вышел из новичков.',C:'Выше среднего.',B:'Топ 5% мира.',A:'Элита. Один на сто.',S:'Легенда. Один на тысячу.'};document.getElementById('rankSubText').textContent=subs[newRank];rup.classList.add('show');spawnParticles(60,color);if(state.vibrateOn&&navigator.vibrate)navigator.vibrate([100,50,100,50,300]);speak(`Ранг ${ATTRS[attr].name}. Новый уровень силы.`);setTimeout(()=>rup.classList.remove('show'),4000);addLegion(ATTRS[attr].name+' достигла ранга '+newRank,newRank)}
+function showPenalty(t){const p=document.getElementById('penalty');document.getElementById('penaltyText').textContent=t;p.classList.add('show');setTimeout(()=>p.classList.remove('show'),3500)}
+function spawnParticles(c,color){color=color||'#00e5ff';for(let i=0;i<c;i++){const p=document.createElement('div');p.className='particle';p.style.left=(50+(Math.random()-.5)*60)+'%';p.style.top=(50+(Math.random()-.5)*60)+'%';p.style.background=color;p.style.boxShadow=`0 0 20px ${color}`;document.body.appendChild(p);const a=Math.random()*Math.PI*2,d=200+Math.random()*500;p.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(0)`,opacity:0}],{duration:1500+Math.random()*500,easing:'cubic-bezier(.2,.7,.3,1)'});setTimeout(()=>p.remove(),2100)}}
+
+/* TIMER */
+let timerTime=25*60,timerMax=25*60,timerRunning=false,timerInterval=null,timerIsBreak=false;
+function updateTimerUI(){const m=Math.floor(timerTime/60),s=timerTime%60;const d=document.getElementById('timerDisplay'),mo=document.getElementById('timerMode');if(d){d.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');d.classList.toggle('break',timerIsBreak)}if(mo){mo.textContent=(timerIsBreak?'ПЕРЕРЫВ':'ФОКУС')+' · '+String(Math.floor(timerMax/60)).padStart(2,'0')+':00'}}
+function initTimer(){document.getElementById('timerStart').onclick=()=>{if(timerRunning){clearInterval(timerInterval);timerRunning=false;document.getElementById('timerStart').textContent='▶ ПРОДОЛЖИТЬ';return}sfx.click();timerRunning=true;document.getElementById('timerStart').textContent='⏸ ПАУЗА';timerInterval=setInterval(()=>{timerTime--;updateTimerUI();if(timerTime<=0){clearInterval(timerInterval);timerRunning=false;document.getElementById('timerStart').textContent='▶ СТАРТ';if(!timerIsBreak){state.sessionsToday++;state.sessionsTotal++;const xp=Math.round(15*xpMultiplier());state.totalXP+=xp;addAttrXP('per',Math.round(xp/2));addAttrXP('int',Math.round(xp/2));saveState();showNotif('🍅 +'+xp+' XP','green');timerIsBreak=true;timerMax=5*60;timerTime=5*60}else{showNotif('ПЕРЕРЫВ');timerIsBreak=false;timerMax=25*60;timerTime=25*60}sfx.pomodoro();if(state.vibrateOn&&navigator.vibrate)navigator.vibrate([200,100,200]);render();updateTimerUI()}},1000)};document.getElementById('timerReset').onclick=()=>{clearInterval(timerInterval);timerRunning=false;timerIsBreak=false;timerMax=25*60;timerTime=25*60;document.getElementById('timerStart').textContent='▶ СТАРТ';updateTimerUI()};document.getElementById('timerSkip').onclick=()=>{timerTime=1};updateTimerUI()}
+
+/* INIT */
+function init(){
+    checkNewDay();applyTheme();
+    document.getElementById('motivText').textContent=pickRandom(QUOTES).t;
+    const jTxt=document.getElementById('journalText');
+    if(jTxt){jTxt.value=state.journals[today()]||'';document.getElementById('journalDate').textContent=formatDate(today());document.getElementById('journalChars').textContent=jTxt.value.length+' символов';let t;jTxt.oninput=()=>{clearTimeout(t);document.getElementById('journalChars').textContent=jTxt.value.length+' символов';document.getElementById('journalSaved').textContent='Сохранение...';t=setTimeout(()=>{state.journals[today()]=jTxt.value;saveState();renderJournalList();document.getElementById('journalSaved').textContent='✓ Сохранено'},700)}}
+    document.querySelectorAll('.nav-item').forEach(item=>{item.onclick=()=>{sfx.click();document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));item.classList.add('active');const key=item.dataset.nav;document.getElementById('panel-'+key).classList.add('active');const nameEl=item.querySelector('span:not(.ni):not(.badge)');document.getElementById('pageTitle').textContent=nameEl?nameEl.textContent.toUpperCase():key.toUpperCase()}});
+    document.getElementById('themeBtn').onclick=()=>{const order=['cyan','red','gold','purple'];state.theme=order[(order.indexOf(state.theme)+1)%order.length];state.accentColor='';applyTheme();saveState();render();showNotif('ТЕМА: '+state.theme.toUpperCase())};
+    document.getElementById('soundBtn').onclick=()=>{state.soundOn=!state.soundOn;saveState();render();showNotif(state.soundOn?'ЗВУК ВКЛ':'ЗВУК ВЫКЛ')};
+    document.getElementById('resetDayBtn').onclick=()=>{if(!confirm('Закрыть день?'))return;sfx.reset();const dp=DAY_PLANS[new Date().getDay()];const done=dp.quests.filter(q=>state.completed[q.id]).length;const pct=(done/dp.quests.length)*100;if(pct>=80)state.streak++;else if(state.streak>0&&state.penaltyOn){state.streak=0;showPenalty('СЕРИЯ ПРЕРВАНА');sfx.penalty()}state.completed={};state.date=today();saveState();render();showNotif('НОВЫЙ ДЕНЬ')};
+    /* WILL */
+    document.getElementById('willMarkBtn').onclick=()=>{if(state.will.lastMark===today()){showNotif('УЖЕ ОТМЕЧЕНО');return}state.will.days++;state.will.lastMark=today();if(state.will.days>state.will.record)state.will.record=state.will.days;const xp=25;state.totalXP+=xp;addAttrXP('per',xp);sfx.willUp();showNotif('🔥 ДЕНЬ '+state.will.days+' · +'+xp+' XP','red');speak('День '+state.will.days+'. Сила растёт.');checkWillRankUp();if(state.will.days%7===0){const b=50;state.totalXP+=b;showNotif('🎁 НЕДЕЛЯ · +'+b+' XP','gold');addLegion('Неделя воздержания: '+state.will.days,'🔥')}saveState();render()};
+    document.getElementById('willFailBtn').onclick=()=>{if(!confirm('Срыв? Счётчик обнулится.'))return;state.will.fails++;state.will.days=0;state.will.rank='E';state.will.lastMark=null;state.totalXP=Math.max(0,state.totalXP-100);showPenalty('СЛАБОСТЬ ВЫБРАНА');sfx.penalty();speak('Падение — не конец. Возвращайся.');addLegion('Срыв воли','⚠');saveState();render()};
+    document.getElementById('willSosBtn').onclick=()=>{const q=pickRandom(WILL_QUOTES_B);showModal('⚡ ЭКСТРЕННЫЙ РЕЖИМ','<div style="font-size:15px;color:#ff6b95;font-style:italic;margin-bottom:18px;">«'+q+'»</div><div style="display:grid;gap:8px;"><button class="btn full red" onclick="emergencyAction(\'30 ОТЖИМАНИЙ\')">💪 30 ОТЖИМАНИЙ</button><button class="btn full red" onclick="emergencyAction(\'ХОЛОДНЫЙ ДУШ\')">🚿 ХОЛОДНЫЙ ДУШ</button><button class="btn full red" onclick="emergencyAction(\'ПРОГУЛКА\')">🚶 ПРОГУЛКА 10 МИН</button></div>');speak(q)};
+    window.emergencyAction=(act)=>{state.will.saves++;sfx.willUp();document.getElementById('modal').classList.remove('show');showNotif('✅ '+act,'green');speak('Спасён момент. Ты победил.');addLegion('Спасён момент: '+act,'✅');state.totalXP+=30;addAttrXP('per',15);addAttrXP('vit',15);saveState();render()};
+    document.getElementById('triggerBtn').onclick=()=>{const i=document.getElementById('triggerInput');const t=i.value.trim();if(!t)return;state.will.triggers.push({date:formatDate(today()),text:t});i.value='';beep(660,.08,'sine',.08);saveState();render()};
+    document.getElementById('logSaveBtn').onclick=()=>{const f=parseInt(document.getElementById('logFocus').value)||5;const e=parseInt(document.getElementById('logEnergy').value)||5;const p=parseInt(document.getElementById('logPower').value)||5;state.will.log.push({date:formatDate(today()),focus:f,energy:e,power:p});sfx.complete();showNotif('📊 СОХРАНЕНО','green');saveState();render()};
+    document.getElementById('willQuoteBox').onclick=()=>{speak(document.getElementById('willQuote').textContent)};
+    /* HABITS */
+    document.getElementById('habitAddBtn').onclick=()=>{const i=document.getElementById('habitInput');const name=i.value.trim();if(!name)return;state.habits.push({id:'h_'+Date.now(),name});i.value='';beep(880,.1,'sine',.08);saveState();render()};
+    document.getElementById('habitInput').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('habitAddBtn').click()});
+    /* MONEY */
+    document.getElementById('moneyLogBtn').onclick=()=>{const i=document.getElementById('moneyLogInput');const text=i.value.trim();if(!text)return;const low=text.toLowerCase();let xp=15;const hm=low.match(/(\d+)\s*(мин|час|ч)/);if(hm){const n=parseInt(hm[1]);const h=low.includes('час')||low.includes(' ч')?n:n/60;state.moneyStudyHours+=h;xp+=Math.round(h*20)}const mm=low.match(/\$(\d+)|(\d+)\s*(руб|\$)/);if(mm){const n=parseInt(mm[1]||mm[2]);state.moneyEarned+=n;xp+=n*5;addLegion('Заработал $'+n,'💰')}if(low.includes('клиент')){state.moneyClients++;xp+=50;addLegion('Найден клиент','💰')}state.totalXP+=xp;addAttrXP('money',xp);state.moneyLog.push({date:formatDate(today()),text,xp});i.value='';sfx.complete();showNotif('💰 +'+xp+' XP','gold');saveState();render()};
+    /* SETTINGS */
+    document.getElementById('nameInput').oninput=e=>{state.name=e.target.value||'Игрок';saveState();render()};
+    document.getElementById('themeSelect').onchange=e=>{state.theme=e.target.value;state.accentColor='';applyTheme();saveState();render()};
+    document.getElementById('colorPick').oninput=e=>{state.accentColor=e.target.value;applyTheme();saveState()};
+    document.getElementById('resetColorBtn').onclick=()=>{state.accentColor='';applyTheme();saveState();render()};
+    document.getElementById('monarchBtn').onclick=()=>{state.monarch=!state.monarch;saveState();render();showNotif('МОНАРХ: '+(state.monarch?'ВКЛ':'ВЫКЛ'),state.monarch?'red':'')};
+    document.getElementById('penaltyBtn').onclick=()=>{state.penaltyOn=!state.penaltyOn;saveState();render()};
+    document.getElementById('cooldownBtn').onclick=()=>{state.cooldownOn=!state.cooldownOn;saveState();render()};
+    document.getElementById('soundToggleBtn').onclick=()=>{state.soundOn=!state.soundOn;saveState();render()};
+    document.getElementById('vibrateBtn').onclick=()=>{state.vibrateOn=!state.vibrateOn;saveState();render()};
+    document.getElementById('voiceBtn').onclick=()=>{state.voiceOn=!state.voiceOn;saveState();render()};
+    document.getElementById('ttsBtn').onclick=()=>{state.ttsOn=!state.ttsOn;saveState();render();showNotif('ОЗВУЧИВАНИЕ: '+(state.ttsOn?'ВКЛ':'ВЫКЛ'))};
+    document.getElementById('voiceFreqSelect').onchange=e=>{state.voiceFreq=e.target.value;saveState()};
+    document.getElementById('voiceTestBtn').onclick=()=>{if(Math.random()<.5){const q=pickRandom(QUOTES);sysVoice({t:q.t,s:'— '+q.a})}else sysVoice(buildVoiceMessage())};
+    document.getElementById('exportBtn').onclick=()=>{const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='system-'+today()+'.json';a.click();URL.revokeObjectURL(u);showNotif('ЭКСПОРТ','green')};
+    document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+    document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const p=JSON.parse(ev.target.result);const b=defaultState();state={...b,...p,attrs:{...b.attrs,...(p.attrs||{})},completed:{},habits:p.habits||[],habitHistory:p.habitHistory||{},journals:p.journals||{},moneyLog:p.moneyLog||[],poemsDone:p.poemsDone||[],tongueDone:p.tongueDone||[],mnemoDone:p.mnemoDone||[],courseDone:p.courseDone||[],will:{...b.will,...(p.will||{})},legion:p.legion||[]};saveState();render();showNotif('ИМПОРТ','green')}catch(err){showNotif('ОШИБКА','red')}};r.readAsText(f)};
+    document.getElementById('wipeBtn').onclick=()=>{if(!confirm('СБРОС ВСЁ?'))return;if(!confirm('Точно?'))return;localStorage.removeItem('systemV12');localStorage.removeItem('systemV11');state=defaultState();saveState();render();showNotif('СБРОШЕНО','red')};
+    document.getElementById('musicPlayBtn').onclick=()=>{if(!music.current){music.play('focus');renderMusicUI();return}if(music.playing)music.stop();else music.play(music.current);renderMusicUI()};
+    document.getElementById('volumeSlider').oninput=e=>{music.setVolume(parseInt(e.target.value)/100)};
+    /* QUOTES */
+    document.getElementById('quoteNextBtn').onclick=()=>{state.quoteIndex=(state.quoteIndex+1)%QUOTES.length;saveState();renderQuotes();sfx.click()};
+    document.getElementById('quoteSpeakBtn').onclick=()=>{const q=QUOTES[state.quoteIndex];speak(q.t+' — '+q.a)};
+    document.getElementById('quoteCopyBtn').onclick=()=>{const q=QUOTES[state.quoteIndex];navigator.clipboard.writeText(q.t+' — '+q.a);showNotif('СКОПИРОВАНО','green')};
+    /* PROGRESS TABS */
+    document.querySelectorAll('.range-btn').forEach(b=>{b.onclick=()=>{sfx.click();document.querySelectorAll('.range-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');progressRange=parseInt(b.dataset.range);renderMainChart()}});
+    /* CLOCK */
+    function updateClock(){const n=new Date();const time=n.toLocaleTimeString('ru');const date=n.toLocaleDateString('ru',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase();const el=document.getElementById('sbClock');if(el)el.innerHTML='<b>'+time+'</b><br>'+date}
+    setInterval(updateClock,1000);updateClock();
+    /* HOTKEYS */
+    document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key>='1'&&e.key<='9'){e.preventDefault();const items=document.querySelectorAll('.nav-item');const i=parseInt(e.key)-1;if(items[i])items[i].click()}if(e.key==='Escape'){sfx.rankUp();spawnParticles(50);showNotif('ARISE');speak('Восстань.')}});
+    document.getElementById('modalOk').onclick=()=>document.getElementById('modal').classList.remove('show');
+    /* TTS PRELOAD */
+    if('speechSynthesis'in window)speechSynthesis.getVoices();
+    render();
+    scheduleVoice();
+    /* Проверка 90 дней для церемонии */
+    if(state.will.days>=90&&state.will.rank!=='S'){state.will.rank='S';saveState()}
+}
+const bootMsgs=['ИНИЦИАЛИЗАЦИЯ ЯДРА...','ПРОВЕРКА ИДЕНТИФИКАЦИИ...','ЗАГРУЗКА ПРОТОКОЛА «MONARCH»...','АКТИВАЦИЯ ВОЛИ...','СИНХРОНИЗАЦИЯ 8 АТРИБУТОВ...','ЗАГРУЗКА ГОЛОСА...','ВСЕ СИСТЕМЫ АКТИВНЫ.'];
+let bootIdx=0;
+function bootStep(){if(bootIdx>=bootMsgs.length){setTimeout(()=>{const b=document.getElementById('boot'),a=document.getElementById('app');if(b)b.classList.add('hide');if(a)a.classList.add('show');setTimeout(()=>{if(b)b.remove();showNotif('СИСТЕМА ГОТОВА','green')},900)},350);return}const bl=document.getElementById('bootLog'),bb=document.getElementById('bootBar');if(bl)bl.textContent=bootMsgs[bootIdx];if(bb)bb.style.width=((bootIdx+1)/bootMsgs.length*100)+'%';bootIdx++;setTimeout(bootStep,350)}
+window.addEventListener('DOMContentLoaded',()=>{init();initTimer();setTimeout(bootStep,250)});
+</script>
+</body>
+</html>
