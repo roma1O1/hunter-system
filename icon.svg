@@ -1,119 +1,108 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="40%">
-      <stop offset="0%" stop-color="#0a1f38"/>
-      <stop offset="55%" stop-color="#050d1a"/>
-      <stop offset="100%" stop-color="#000"/>
-    </radialGradient>
-    <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#003d5c"/>
-      <stop offset="20%" stop-color="#0088cc"/>
-      <stop offset="45%" stop-color="#00e5ff"/>
-      <stop offset="55%" stop-color="#ffffff"/>
-      <stop offset="65%" stop-color="#00e5ff"/>
-      <stop offset="80%" stop-color="#0088cc"/>
-      <stop offset="100%" stop-color="#003d5c"/>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#050d1a"/>
+      <stop offset="50%" stop-color="#000"/>
+      <stop offset="100%" stop-color="#050d1a"/>
     </linearGradient>
-    <linearGradient id="bladeEdge" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#00e5ff" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+    <linearGradient id="panelGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.18"/>
+      <stop offset="50%" stop-color="#00e5ff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0.15"/>
     </linearGradient>
-    <linearGradient id="guardGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#001a2e"/>
-      <stop offset="50%" stop-color="#00e5ff"/>
-      <stop offset="100%" stop-color="#001a2e"/>
-    </linearGradient>
-    <linearGradient id="handleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#000814"/>
-      <stop offset="50%" stop-color="#003d5c"/>
-      <stop offset="100%" stop-color="#000814"/>
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="50%" stop-color="#00b0ff"/>
+      <stop offset="100%" stop-color="#00e5ff"/>
     </linearGradient>
     <filter id="glowSm">
-      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feGaussianBlur stdDeviation="2" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <filter id="glowMd">
-      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feGaussianBlur stdDeviation="6" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <filter id="glowBig">
-      <feGaussianBlur stdDeviation="20" result="b"/>
+      <feGaussianBlur stdDeviation="18" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="auraBlur">
-      <feGaussianBlur stdDeviation="26"/>
     </filter>
   </defs>
   
-  <rect width="512" height="512" rx="90" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="80" fill="url(#bg)"/>
   
-  <ellipse cx="256" cy="240" rx="150" ry="220" fill="#00e5ff" opacity="0.15" filter="url(#auraBlur)"/>
-  
-  <g filter="url(#glowBig)" opacity="0.65">
-    <ellipse cx="256" cy="230" rx="40" ry="140" fill="#00e5ff" opacity="0.5"/>
+  <g opacity="0.5" filter="url(#glowBig)">
+    <rect x="70" y="150" width="372" height="212" rx="6" fill="#00e5ff"/>
   </g>
   
   <g filter="url(#glowMd)">
-    <polygon points="256,60 305,165 256,290 207,165" fill="url(#bladeGrad)"/>
-    <polygon points="256,60 280,165 256,290 232,165" fill="#ffffff" opacity="0.25"/>
+    <rect x="80" y="160" width="352" height="192" rx="4" fill="url(#panelGrad)" stroke="url(#borderGrad)" stroke-width="3"/>
   </g>
   
-  <g filter="url(#glowMd)" fill="none" stroke="#00e5ff" stroke-width="3" stroke-linejoin="miter">
-    <polygon points="256,60 305,165 256,290 207,165"/>
-  </g>
+  <rect x="80" y="160" width="352" height="36" rx="4" fill="#00e5ff" opacity="0.2"/>
+  <line x1="80" y1="196" x2="432" y2="196" stroke="#00e5ff" stroke-width="1.5" opacity="0.9"/>
   
-  <g filter="url(#glowSm)" opacity="0.9">
-    <line x1="256" y1="70" x2="256" y2="285" stroke="#ffffff" stroke-width="1.5" opacity="0.7"/>
-    <line x1="232" y1="140" x2="232" y2="270" stroke="#00ffff" stroke-width="0.8" opacity="0.4"/>
-    <line x1="280" y1="140" x2="280" y2="270" stroke="#00ffff" stroke-width="0.8" opacity="0.4"/>
-  </g>
-  
-  <g filter="url(#glowMd)">
-    <rect x="190" y="286" width="132" height="16" rx="3" fill="url(#guardGrad)"/>
-    <line x1="190" y1="294" x2="322" y2="294" stroke="#ffffff" stroke-width="1" opacity="0.6"/>
-  </g>
-  
-  <g filter="url(#glowSm)" fill="#00e5ff">
-    <polygon points="185,286 200,286 200,302 185,302" opacity="0.9"/>
-    <polygon points="312,286 327,286 327,302 312,302" opacity="0.9"/>
-    <circle cx="192" cy="294" r="3" fill="#ffffff"/>
-    <circle cx="320" cy="294" r="3" fill="#ffffff"/>
+  <g filter="url(#glowSm)">
+    <circle cx="102" cy="178" r="4" fill="#00e5ff" opacity="0.9"/>
+    <circle cx="120" cy="178" r="4" fill="#00e5ff" opacity="0.5"/>
+    <circle cx="138" cy="178" r="4" fill="#00e5ff" opacity="0.3"/>
   </g>
   
   <g filter="url(#glowMd)">
-    <rect x="236" y="302" width="40" height="110" rx="6" fill="url(#handleGrad)" stroke="#00e5ff" stroke-width="2"/>
+    <text x="256" y="182" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="15" font-weight="900" fill="#00e5ff" letter-spacing="6">SYSTEM</text>
   </g>
   
-  <g stroke="#00e5ff" stroke-width="2.5" opacity="0.85" filter="url(#glowSm)" fill="none" stroke-linecap="round">
-    <line x1="238" y1="320" x2="274" y2="308"/>
-    <line x1="238" y1="342" x2="274" y2="330"/>
-    <line x1="238" y1="364" x2="274" y2="352"/>
-    <line x1="238" y1="386" x2="274" y2="374"/>
-    <line x1="238" y1="408" x2="274" y2="396"/>
+  <g filter="url(#glowSm)" opacity="0.4" stroke="#00e5ff" stroke-width="1">
+    <line x1="110" y1="220" x2="410" y2="220" stroke-dasharray="2,4"/>
+    <line x1="110" y1="260" x2="410" y2="260" stroke-dasharray="2,4"/>
+    <line x1="110" y1="300" x2="410" y2="300" stroke-dasharray="2,4"/>
   </g>
   
   <g filter="url(#glowMd)">
-    <circle cx="256" cy="428" r="14" fill="#001a2e" stroke="#00e5ff" stroke-width="3"/>
-    <circle cx="256" cy="428" r="6" fill="#00e5ff"/>
-    <circle cx="256" cy="428" r="2" fill="#ffffff"/>
+    <text x="256" y="260" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="34" font-weight="900" fill="#ffffff" letter-spacing="8">СИСТЕМА</text>
   </g>
   
-  <g filter="url(#glowSm)" fill="#00e5ff" opacity="0.85">
-    <polygon points="135,130 143,138 135,146 127,138"/>
-    <polygon points="377,130 385,138 377,146 369,138"/>
-    <polygon points="110,360 116,366 110,372 104,366"/>
-    <polygon points="402,360 408,366 402,372 396,366"/>
+  <g filter="url(#glowSm)" opacity="0.6">
+    <text x="256" y="288" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="11" font-weight="700" fill="#00e5ff" letter-spacing="4">AWAKENED</text>
   </g>
   
-  <g filter="url(#glowSm)" stroke="#00e5ff" stroke-width="1.5" opacity="0.5">
-    <line x1="135" y1="138" x2="185" y2="138" stroke-dasharray="4,6"/>
-    <line x1="327" y1="138" x2="377" y2="138" stroke-dasharray="4,6"/>
-    <line x1="100" y1="256" x2="70" y2="256" stroke-dasharray="3,5"/>
-    <line x1="412" y1="256" x2="442" y2="256" stroke-dasharray="3,5"/>
+  <g filter="url(#glowSm)" fill="#00e5ff" opacity="0.9">
+    <rect x="200" y="316" width="112" height="3" rx="1.5"/>
   </g>
   
-  <g filter="url(#glowSm)" opacity="0.55">
-    <text x="256" y="482" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="18" font-weight="900" fill="#00e5ff" letter-spacing="12">◆ ◆ ◆</text>
+  <g filter="url(#glowSm)" fill="#00e5ff" opacity="0.5">
+    <rect x="220" y="328" width="72" height="2" rx="1"/>
+  </g>
+  
+  <g filter="url(#glowSm)" fill="none" stroke="#00e5ff" stroke-width="4" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M 80 178 L 80 160 L 98 160"/>
+    <path d="M 432 178 L 432 160 L 414 160"/>
+    <path d="M 80 334 L 80 352 L 98 352"/>
+    <path d="M 432 334 L 432 352 L 414 352"/>
+  </g>
+  
+  <g filter="url(#glowMd)" opacity="0.85" fill="#00e5ff">
+    <polygon points="120,90 126,96 120,102 114,96"/>
+    <polygon points="392,90 398,96 392,102 386,96"/>
+    <polygon points="120,428 126,434 120,440 114,434"/>
+    <polygon points="392,428 398,434 392,440 386,434"/>
+  </g>
+  
+  <g filter="url(#glowSm)" opacity="0.5" stroke="#00e5ff" stroke-width="1.5">
+    <line x1="120" y1="108" x2="120" y2="140"/>
+    <line x1="392" y1="108" x2="392" y2="140"/>
+    <line x1="120" y1="372" x2="120" y2="410"/>
+    <line x1="392" y1="372" x2="392" y2="410"/>
+  </g>
+  
+  <g filter="url(#glowSm)" opacity="0.7">
+    <rect x="140" y="120" width="40" height="2" fill="#00e5ff"/>
+    <rect x="332" y="120" width="40" height="2" fill="#00e5ff"/>
+    <rect x="140" y="390" width="40" height="2" fill="#00e5ff"/>
+    <rect x="332" y="390" width="40" height="2" fill="#00e5ff"/>
+  </g>
+  
+  <g filter="url(#glowSm)" opacity="0.6">
+    <text x="256" y="462" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="20" font-weight="900" fill="#00e5ff" letter-spacing="10">◆ ◆ ◆</text>
   </g>
 </svg>
