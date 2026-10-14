@@ -1,31 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#06121f"/>
-      <stop offset="60%" stop-color="#020608"/>
+    <radialGradient id="bg" cx="50%" cy="40%">
+      <stop offset="0%" stop-color="#0a1f38"/>
+      <stop offset="55%" stop-color="#050d1a"/>
       <stop offset="100%" stop-color="#000"/>
     </radialGradient>
-    <radialGradient id="auraOuter" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.55"/>
-      <stop offset="40%" stop-color="#00b0ff" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="irisGrad" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="20%" stop-color="#a0ffff"/>
-      <stop offset="45%" stop-color="#00ffff"/>
-      <stop offset="75%" stop-color="#00aaff"/>
-      <stop offset="100%" stop-color="#003d66"/>
-    </radialGradient>
-    <radialGradient id="irisCenter" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
-      <stop offset="40%" stop-color="#00ffff" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="slash" x1="0%" y1="0%" x2="0%" y2="100%">
+    <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#003d5c"/>
+      <stop offset="20%" stop-color="#0088cc"/>
+      <stop offset="45%" stop-color="#00e5ff"/>
+      <stop offset="55%" stop-color="#ffffff"/>
+      <stop offset="65%" stop-color="#00e5ff"/>
+      <stop offset="80%" stop-color="#0088cc"/>
+      <stop offset="100%" stop-color="#003d5c"/>
+    </linearGradient>
+    <linearGradient id="bladeEdge" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#00e5ff" stop-opacity="0"/>
       <stop offset="50%" stop-color="#00e5ff" stop-opacity="0.9"/>
       <stop offset="100%" stop-color="#00e5ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="guardGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#001a2e"/>
+      <stop offset="50%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#001a2e"/>
+    </linearGradient>
+    <linearGradient id="handleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#000814"/>
+      <stop offset="50%" stop-color="#003d5c"/>
+      <stop offset="100%" stop-color="#000814"/>
     </linearGradient>
     <filter id="glowSm">
       <feGaussianBlur stdDeviation="3" result="b"/>
@@ -40,82 +42,78 @@
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
     <filter id="auraBlur">
-      <feGaussianBlur stdDeviation="30"/>
+      <feGaussianBlur stdDeviation="26"/>
     </filter>
   </defs>
   
   <rect width="512" height="512" rx="90" fill="url(#bg)"/>
   
-  <ellipse cx="256" cy="256" rx="220" ry="220" fill="url(#auraOuter)" filter="url(#auraBlur)"/>
+  <ellipse cx="256" cy="240" rx="150" ry="220" fill="#00e5ff" opacity="0.15" filter="url(#auraBlur)"/>
   
-  <g filter="url(#glowBig)" opacity="0.85">
-    <ellipse cx="256" cy="256" rx="140" ry="90" fill="#00e5ff" opacity="0.35"/>
+  <g filter="url(#glowBig)" opacity="0.65">
+    <ellipse cx="256" cy="230" rx="40" ry="140" fill="#00e5ff" opacity="0.5"/>
   </g>
   
   <g filter="url(#glowMd)">
-    <path d="M 60 256 Q 130 140 256 140 Q 382 140 452 256 Q 382 372 256 372 Q 130 372 60 256 Z" 
-          fill="#000814"/>
+    <polygon points="256,60 305,165 256,290 207,165" fill="url(#bladeGrad)"/>
+    <polygon points="256,60 280,165 256,290 232,165" fill="#ffffff" opacity="0.25"/>
   </g>
   
-  <g filter="url(#glowMd)" fill="none" stroke="#00e5ff" stroke-width="4" opacity="0.9">
-    <path d="M 60 256 Q 130 140 256 140 Q 382 140 452 256 Q 382 372 256 372 Q 130 372 60 256 Z"/>
+  <g filter="url(#glowMd)" fill="none" stroke="#00e5ff" stroke-width="3" stroke-linejoin="miter">
+    <polygon points="256,60 305,165 256,290 207,165"/>
   </g>
   
-  <g filter="url(#glowSm)" opacity="0.6">
-    <path d="M 70 256 Q 135 150 256 150" fill="none" stroke="#ffffff" stroke-width="2"/>
-    <path d="M 256 362 Q 377 362 442 256" fill="none" stroke="#ffffff" stroke-width="2"/>
-  </g>
-  
-  <g filter="url(#glowBig)" opacity="0.7">
-    <ellipse cx="256" cy="256" rx="90" ry="90" fill="#00e5ff" opacity="0.55"/>
+  <g filter="url(#glowSm)" opacity="0.9">
+    <line x1="256" y1="70" x2="256" y2="285" stroke="#ffffff" stroke-width="1.5" opacity="0.7"/>
+    <line x1="232" y1="140" x2="232" y2="270" stroke="#00ffff" stroke-width="0.8" opacity="0.4"/>
+    <line x1="280" y1="140" x2="280" y2="270" stroke="#00ffff" stroke-width="0.8" opacity="0.4"/>
   </g>
   
   <g filter="url(#glowMd)">
-    <ellipse cx="256" cy="256" rx="72" ry="72" fill="url(#irisGrad)"/>
+    <rect x="190" y="286" width="132" height="16" rx="3" fill="url(#guardGrad)"/>
+    <line x1="190" y1="294" x2="322" y2="294" stroke="#ffffff" stroke-width="1" opacity="0.6"/>
   </g>
   
-  <g filter="url(#glowSm)" opacity="0.85" fill="none" stroke="#001a2e" stroke-width="1.5">
-    <ellipse cx="256" cy="256" rx="62" ry="62"/>
-    <ellipse cx="256" cy="256" rx="50" ry="50"/>
-    <ellipse cx="256" cy="256" rx="38" ry="38"/>
+  <g filter="url(#glowSm)" fill="#00e5ff">
+    <polygon points="185,286 200,286 200,302 185,302" opacity="0.9"/>
+    <polygon points="312,286 327,286 327,302 312,302" opacity="0.9"/>
+    <circle cx="192" cy="294" r="3" fill="#ffffff"/>
+    <circle cx="320" cy="294" r="3" fill="#ffffff"/>
   </g>
   
-  <g filter="url(#glowSm)" opacity="0.9">
-    <line x1="256" y1="190" x2="256" y2="322" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
-    <line x1="196" y1="256" x2="316" y2="256" stroke="#00e5ff" stroke-width="1" opacity="0.5"/>
-    <line x1="215" y1="215" x2="297" y2="297" stroke="#00e5ff" stroke-width="1" opacity="0.4"/>
-    <line x1="297" y1="215" x2="215" y2="297" stroke="#00e5ff" stroke-width="1" opacity="0.4"/>
+  <g filter="url(#glowMd)">
+    <rect x="236" y="302" width="40" height="110" rx="6" fill="url(#handleGrad)" stroke="#00e5ff" stroke-width="2"/>
   </g>
   
-  <g filter="url(#glowBig)">
-    <ellipse cx="256" cy="256" rx="16" ry="58" fill="#000000"/>
-    <ellipse cx="256" cy="256" rx="16" ry="58" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.9"/>
-    <ellipse cx="256" cy="256" rx="6" ry="50" fill="#0a1a30"/>
+  <g stroke="#00e5ff" stroke-width="2.5" opacity="0.85" filter="url(#glowSm)" fill="none" stroke-linecap="round">
+    <line x1="238" y1="320" x2="274" y2="308"/>
+    <line x1="238" y1="342" x2="274" y2="330"/>
+    <line x1="238" y1="364" x2="274" y2="352"/>
+    <line x1="238" y1="386" x2="274" y2="374"/>
+    <line x1="238" y1="408" x2="274" y2="396"/>
   </g>
   
-  <g filter="url(#glowSm)" opacity="0.9">
-    <ellipse cx="243" cy="225" rx="7" ry="14" fill="#ffffff"/>
-    <ellipse cx="268" cy="290" rx="4" ry="8" fill="#00ffff" opacity="0.7"/>
+  <g filter="url(#glowMd)">
+    <circle cx="256" cy="428" r="14" fill="#001a2e" stroke="#00e5ff" stroke-width="3"/>
+    <circle cx="256" cy="428" r="6" fill="#00e5ff"/>
+    <circle cx="256" cy="428" r="2" fill="#ffffff"/>
   </g>
   
-  <g filter="url(#glowMd)" stroke="url(#slash)" stroke-width="3" fill="none" opacity="0.8">
-    <path d="M 130 100 L 180 90"/>
-    <path d="M 340 90 L 390 100"/>
-    <path d="M 130 412 L 180 422"/>
-    <path d="M 340 422 L 390 412"/>
-  </g>
-  
-  <g filter="url(#glowSm)" opacity="0.9">
-    <circle cx="100" cy="256" r="5" fill="#00e5ff"/>
-    <circle cx="412" cy="256" r="5" fill="#00e5ff"/>
-    <circle cx="256" cy="90" r="4" fill="#00e5ff" opacity="0.7"/>
-    <circle cx="256" cy="422" r="4" fill="#00e5ff" opacity="0.7"/>
+  <g filter="url(#glowSm)" fill="#00e5ff" opacity="0.85">
+    <polygon points="135,130 143,138 135,146 127,138"/>
+    <polygon points="377,130 385,138 377,146 369,138"/>
+    <polygon points="110,360 116,366 110,372 104,366"/>
+    <polygon points="402,360 408,366 402,372 396,366"/>
   </g>
   
   <g filter="url(#glowSm)" stroke="#00e5ff" stroke-width="1.5" opacity="0.5">
-    <line x1="100" y1="256" x2="130" y2="256"/>
-    <line x1="382" y1="256" x2="412" y2="256"/>
-    <line x1="256" y1="110" x2="256" y2="130"/>
-    <line x1="256" y1="382" x2="256" y2="402"/>
+    <line x1="135" y1="138" x2="185" y2="138" stroke-dasharray="4,6"/>
+    <line x1="327" y1="138" x2="377" y2="138" stroke-dasharray="4,6"/>
+    <line x1="100" y1="256" x2="70" y2="256" stroke-dasharray="3,5"/>
+    <line x1="412" y1="256" x2="442" y2="256" stroke-dasharray="3,5"/>
+  </g>
+  
+  <g filter="url(#glowSm)" opacity="0.55">
+    <text x="256" y="482" text-anchor="middle" font-family="'Orbitron','Arial',sans-serif" font-size="18" font-weight="900" fill="#00e5ff" letter-spacing="12">◆ ◆ ◆</text>
   </g>
 </svg>
