@@ -1150,7 +1150,7 @@ function init(){
 const bootMsgs=['ИНИЦИАЛИЗАЦИЯ ЯДРА...','ПРОВЕРКА ИДЕНТИФИКАЦИИ...','ЗАГРУЗКА ПРОТОКОЛА «MONARCH»...','АКТИВАЦИЯ ВОЛИ...','СИНХРОНИЗАЦИЯ 8 АТРИБУТОВ...','ПРОВЕРКА ОБЛАКА...','ВСЕ СИСТЕМЫ АКТИВНЫ.'];
 let bootIdx=0;
 function bootStep(){if(bootIdx>=bootMsgs.length){setTimeout(()=>{const b=document.getElementById('boot'),a=document.getElementById('app');if(b)b.classList.add('hide');if(a)a.classList.add('show');setTimeout(()=>{if(b)b.remove();showNotif('СИСТЕМА ГОТОВА','green')},900)},350);return}const bl=document.getElementById('bootLog'),bb=document.getElementById('bootBar');if(bl)bl.textContent=bootMsgs[bootIdx];if(bb)bb.style.width=((bootIdx+1)/bootMsgs.length*100)+'%';bootIdx++;setTimeout(bootStep,350)}
-if('serviceWorker'in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(e=>console.log('SW',e))})}
+/* SW отключён */
 window.addEventListener('DOMContentLoaded',()=>{init();initTimer();setTimeout(bootStep,250)});
 </script>
 </body>
