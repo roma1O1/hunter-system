@@ -960,7 +960,7 @@ async function cloudLoad(){
         if(content&&content!=='{}'){
             const parsed=JSON.parse(content);
             if(confirm('Загрузить облачный прогресс? Текущий будет перезаписан.')){
-                state={...parsed,cloud:{...state.cloud,...(parsed.cloud||{})}};
+                state={...parsed,cloud:{...(parsed.cloud||{}),...state.cloud}};
                 saveState();render();
                 showNotif('☁️ ЗАГРУЖЕНО ИЗ ОБЛАКА','green');
                 addLegion('Прогресс загружен из облака','☁️');
